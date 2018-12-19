@@ -31,7 +31,7 @@ func (t *WindowedTable) FormatAbsoluteExpr() string {
 	to := t.Window.To.UnixNano() / int64(time.Millisecond)
 	project := t.ProjectID
 	if project != "" {
-		project = ":" + t.ProjectID
+		project += ":"
 	}
 	return fmt.Sprintf("[%v%v@%v-%v]", project, t.ID, from, to)
 }
