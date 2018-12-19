@@ -40,9 +40,7 @@ In the absence of partition and clustering the following table design layout sho
 
 In both of the scenarios it is possible to use [table template](https://cloud.google.com/bigquery/streaming-data-into-bigquery) in case when data is streamed to Big Query.
 
-## Usage
-
-### Multi Read One Write scenario
+**Multi Read One Write scenario**
 
 The following shows example dataset windowing timeline:
 
@@ -69,8 +67,19 @@ The following shows example dataset windowing timeline:
 
  TDD - add documentation here
 
+## Usage
+
+### Stand alone app
+
+### Apache beam 
+
+ - JDK
+ 
+ - GO sdk
+
+
     
-## Installation
+## Deployment
 
 Stand alone service
 TDD - add documentation here
@@ -87,4 +96,5 @@ Disclaimer: Go Cloud function is only available at alpha at the moment, use the 
 - export GOOGLE_APPLICATION_CREDENTIALS=credentialFile
 - gcloud alpha functions deploy WindowedTable --entry-point Handle --runtime go111 --trigger-http
 
- 
+
+

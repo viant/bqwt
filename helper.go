@@ -110,7 +110,7 @@ func HandleRequest(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if request.AbsoluteExpression {
-		_, err = fmt.Fprint(w, response.Meta.AbsoluteExpressions)
+		_, err = fmt.Fprint(w, response.Meta.AbsoluteExpression)
 	} else if request.Expression {
 		_, err = fmt.Fprint(w, response.Meta.Expression)
 	} else {
