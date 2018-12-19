@@ -16,7 +16,7 @@ type FormFields struct {
 	Expr     string
 	Loopback string
 	Prune    string
-	Absolute string
+	AbsoluteExpr string
 }
 
 func (f *FormFields) Validate() error {
@@ -43,7 +43,10 @@ func (f *FormFields) AsRequest() (*Request, error) {
 	request.Mode = f.Mode
 	request.MatchingTables = strings.Split(f.Match, ",")
 	request.Location = f.Location
+
 	request.Expression = toolbox.AsBoolean(f.Expr)
+	request.AbsoluteExpression = toolbox.AsBoolean(f.AbsoluteExpr)
+
 	if f.Loopback != "" {
 		if request.LoopbackWindowInSec, err = toolbox.ToInt(f.Loopback); err != nil {
 			return nil, fmt.Errorf("invalid loopback %v, %v", f.Loopback, err)
@@ -73,6 +76,6 @@ func NewFormFields(request *http.Request) (*FormFields, error) {
 		Expr:     request.Form.Get("expr"),
 		Loopback: request.Form.Get("location"),
 		Prune:    request.Form.Get("pure"),
-		Absolute: request.Form.Get("absExpr"),
+		AbsoluteExpr: request.Form.Get("absExpr"),
 	}, nil
 }

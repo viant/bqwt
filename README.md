@@ -48,29 +48,43 @@ The following shows example dataset windowing timeline:
 
 1) t0: data is streamed to Big Query
 2) t1: Process X reads dataset snapshot between t0 and t1 
-    a) WindowedTable?mode=r&meta=bucket/x/meta.json&dataset=project:dataset&expr=true'
+    a)  call http endpoint with WindowedTable?mode=r&meta=bucket/x/meta.json&dataset=project:dataset&expr=true'
 3) t2: more data is streamed
 4) t3: Process X completed t0 to t1 processing, flags t0-t1 completed 
-    a) WindowedTable?mode=w&meta=bucket/x/meta.json&dataset=project:dataset&expr=true'
+    a) call http endpoint with WindowedTable?mode=w&meta=bucket/x/meta.json&dataset=project:dataset&expr=true'
 5) t4: more data is streamed
 6) t5: Process X reads dataset snapshot between t2 and t4 
-    a) WindowedTable?mode=r&meta=bucket/x/meta.json&dataset=project:dataset&expr=true'
+    a) call http endpoint with WindowedTable?mode=r&meta=bucket/x/meta.json&dataset=project:dataset&expr=true'
 7) t6: more data is streamed
 8) t7: Process X tries to process data but something goes wrong, thus no update
 9) t8: more data is streamed
 10) t9: Process X again reads dataset snapshot between t2 and t4 
-    a) WindowedTable?mode=r&meta=bucket/x/meta.json&dataset=project:dataset&expr=true'
+    a) call http endpoint with WindowedTable?mode=r&meta=bucket/x/meta.json&dataset=project:dataset&expr=true'
 11) t10: more data is streamed
 12) t11: Process X completed t2 to t4 processing, flags t2-t4 completed
-    a) WindowedTable?mode=w&meta=bucket/x/meta.json&dataset=project:dataset&expr=true'
+    a) call http endpoint with WindowedTable?mode=w&meta=bucket/x/meta.json&dataset=project:dataset&expr=true'
+
+
+### Endpoint invocation:
+
+ TDD - add documentation here
+
     
 ## Installation
 
-
 Stand alone service
-
+TDD - add documentation here
 Docker service
+TDD - add documentation here
 
-Gloud function
+### Google cloud deployment
 
+Disclaimer: Go Cloud function is only available at alpha at the moment, use the following [form](https://docs.google.com/forms/d/e/1FAIpQLSfJ08R2z7FumQyYGGuTyK4x5M-6ch7WmJ_3uWYI5SdZUb5SBw/viewform) to apply for early access.
 
+- gcloud auth login
+- gcloud components install alpha
+- gcloud config set project PROJECT_ID
+- export GOOGLE_APPLICATION_CREDENTIALS=credentialFile
+- gcloud alpha functions deploy WindowedTable --entry-point Handle --runtime go111 --trigger-http
+
+ 

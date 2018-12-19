@@ -19,7 +19,7 @@ require (
 	github.com/viant/bgc v0.2.1
 	github.com/viant/dsc v0.2.0 // indirect
 	github.com/viant/dsunit v0.2.1
-	github.com/viant/toolbox v0.4.1
+	github.com/viant/toolbox v0.5.0
 	go.opencensus.io v0.18.0 // indirect
 	golang.org/x/crypto v0.0.0-20181203042331-505ab145d0a9 // indirect
 	golang.org/x/net v0.0.0-20181213202711-891ebc4b82d6 // indirect
