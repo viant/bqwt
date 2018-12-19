@@ -1,0 +1,7 @@
+{
+  "SourceMetaURL" : "gs://e2e-agg/meta.json",
+  "DestMetaURL" : "gs://e2e-agg/meta.json",
+  "DatasetLocation":"US",
+  "DatasetID": "viant-adelphic:agg_adlogs",
+  "LoopbackWindowInSec": 604800
+}
