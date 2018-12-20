@@ -46,7 +46,7 @@ The following shows example dataset windowing timeline:
 
 1) t0: data is streamed to Big Query
 2) t1: Process X reads dataset snapshot between t0 and t1 
-    -  call http endpoint with WindowedTable?mode=r&meta=bucket/x/meta.json&dataset=project:dataset&expr=true'
+    -  WindowedTable?mode=r&meta=bucket/x/meta.json&dataset=project:dataset&expr=true'
 3) t2: more data is streamed
 4) t3: Process X completed t0 to t1 processing, flags t0-t1 completed 
     -   WindowedTable?mode=w&meta=bucket/x/meta.json&dataset=project:dataset&expr=true'
