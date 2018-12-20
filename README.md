@@ -46,21 +46,21 @@ The following shows example dataset windowing timeline:
 
 1) t0: data is streamed to Big Query
 2) t1: Process X reads dataset snapshot between t0 and t1 
-    a)  call http endpoint with WindowedTable?mode=r&meta=bucket/x/meta.json&dataset=project:dataset&expr=true'
+    -  call http endpoint with WindowedTable?mode=r&meta=bucket/x/meta.json&dataset=project:dataset&expr=true'
 3) t2: more data is streamed
 4) t3: Process X completed t0 to t1 processing, flags t0-t1 completed 
-    a) call http endpoint with WindowedTable?mode=w&meta=bucket/x/meta.json&dataset=project:dataset&expr=true'
+    -   WindowedTable?mode=w&meta=bucket/x/meta.json&dataset=project:dataset&expr=true'
 5) t4: more data is streamed
 6) t5: Process X reads dataset snapshot between t2 and t4 
-    a) call http endpoint with WindowedTable?mode=r&meta=bucket/x/meta.json&dataset=project:dataset&expr=true'
+    -   WindowedTable?mode=r&meta=bucket/x/meta.json&dataset=project:dataset&expr=true'
 7) t6: more data is streamed
 8) t7: Process X tries to process data but something goes wrong, thus no update
 9) t8: more data is streamed
 10) t9: Process X again reads dataset snapshot between t2 and t4 
-    a) call http endpoint with WindowedTable?mode=r&meta=bucket/x/meta.json&dataset=project:dataset&expr=true'
+    -   WindowedTable?mode=r&meta=bucket/x/meta.json&dataset=project:dataset&expr=true'
 11) t10: more data is streamed
 12) t11: Process X completed t2 to t4 processing, flags t2-t4 completed
-    a) call http endpoint with WindowedTable?mode=w&meta=bucket/x/meta.json&dataset=project:dataset&expr=true'
+    -   WindowedTable?mode=w&meta=bucket/x/meta.json&dataset=project:dataset&expr=true'
 
 
 ### Endpoint invocation:
