@@ -2,7 +2,7 @@
 
 This library is compatible with Go 1.11+
 
-#Please refer to [`CHANGELOG.md`](CHANGELOG.md) if you encounter breaking changes.
+Please refer to [`CHANGELOG.md`](CHANGELOG.md) if you encounter breaking changes.
 
 - [Motivation](#Motivation)
 
