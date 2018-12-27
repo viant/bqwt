@@ -8,14 +8,14 @@ import (
 )
 
 type FormFields struct {
-	Meta     string
-	Dataset  string
-	Mode     string
-	Match    string
-	Location string
-	Expr     string
-	Loopback string
-	Prune    string
+	Meta         string
+	Dataset      string
+	Mode         string
+	Match        string
+	Location     string
+	Expr         string
+	Loopback     string
+	Prune        string
 	AbsoluteExpr string
 }
 
@@ -68,14 +68,14 @@ func NewFormFields(request *http.Request) (*FormFields, error) {
 		return nil, fmt.Errorf("form field were empty")
 	}
 	return &FormFields{
-		Meta:     request.Form.Get("meta"),
-		Dataset:  request.Form.Get("dataset"),
-		Mode:     request.Form.Get("mode"),
-		Match:    request.Form.Get("match"),
-		Location: request.Form.Get("location"),
-		Expr:     request.Form.Get("expr"),
-		Loopback: request.Form.Get("location"),
-		Prune:    request.Form.Get("pure"),
+		Meta:         request.Form.Get("meta"),
+		Dataset:      request.Form.Get("dataset"),
+		Mode:         request.Form.Get("mode"),
+		Match:        request.Form.Get("match"),
+		Location:     request.Form.Get("location"),
+		Expr:         request.Form.Get("expr"),
+		Loopback:     request.Form.Get("loopback"),
+		Prune:        request.Form.Get("prune"),
 		AbsoluteExpr: request.Form.Get("absExpr"),
 	}, nil
 }
