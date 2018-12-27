@@ -40,6 +40,130 @@ In the absence of partition and clustering the following table design layout sho
 
 In both of the scenarios it is possible to use [table template](https://cloud.google.com/bigquery/streaming-data-into-bigquery) in case when data is streamed to Big Query.
 
+
+This project uses a meta file to store time windowed table processing state.
+
+@metafile
+
+```json
+{
+  "URL": "gs://mybucket/xmeta",
+  "DatasetID": "my-project:mydataset",
+  "Tables": [
+    {
+      "ID": "mydataset.my_table_10_20181227",
+      "ProjectID": "my-project",
+      "Name": "my_table_10_20181227",
+      "Dataset": "mydataset",
+      "Window": {
+        "From": "2018-12-27T16:00:37.802Z",
+        "To": "2018-12-27T17:00:15.832Z"
+      },
+      "LastChangedFlag": "2018-12-27T17:00:57.238680333Z",
+      "Changed": true,
+      "Expression": "[mydataset.my_table_10_20181227@1545926437802-1545930015832]",
+      "AbsoluteExpression": "[my-project:mydataset.my_table_10_20181227@1545926437802-1545930015832]"
+    },
+      {
+          "ID": "mydataset.my_table_10_20181226",
+          "ProjectID": "my-project",
+          "Name": "my_table_10_20181226",
+          "Dataset": "mydataset",
+          "Window": {
+            "From": "2018-12-26T16:00:37.802Z",
+            "To": "2018-12-26T17:00:15.832Z"
+          },
+          "LastChangedFlag": "2018-12-26T17:00:57.238680333Z",
+          "Changed": false
+        }
+  ],
+  "Expression": "[mydataset.my_table_10_20181227@1545926437802-1545930015832]",
+  "AbsoluteExpression": "[my-project:mydataset.my_table_10_20181227@1545926437802-1545930015832]"
+}
+```
+
+
+## Model
+
+
+- [WindowTable](table.go) 
+```go
+type WindowedTable struct {
+	ID                 string
+	ProjectID          string
+	Name               string
+	Dataset            string
+	Window             *TimeWindow `description:"recent change range: from, to timestamp"`
+	LastChanged    time.Time 
+	Changed            bool
+	Expression         string `description:"represents table ranged decorator expression"`
+	AbsoluteExpression string `description:"represents absolute table path ranged decorator expression"`
+}
+```
+
+- [Meta](meta.go)
+```go
+type Meta struct {
+	URL                 string
+	DatasetID           string
+	Tables              []*WindowedTable 
+	Expression          string `description:"represents recently changed tables ranged decorator relative expression (without project id)"`
+	AbsoluteExpression  string `description:"represents recently changed tables ranged decorator absolute expression (with project id)"`
+
+}
+```
+
+## Service Contract
+
+Service accepts both POST and GET http method 
+ 
+##### POST method [request](contract.go)
+
+```go    
+type Request struct {
+	Mode                string   `description:"operation mode: r - take snapshot, w - persist snapshot"`
+	MetaURL             string   `description:"meta-file location, if relative path is used it adds gs:// protocol"`
+	Location            string   `description:"dataset location"`
+	DatasetID           string   `description:"source dataset"`
+	MatchingTables      []string `description:"matching table contain expression"`
+	PruneThresholdInSec int      `description:"max allowed duration in sec for unchanged windowed tables before removing"`
+	LoopbackWindowInSec int      `description:"dataset max loopback window for checking changed tables in supplied dataset"`
+	Expression          bool     `description:"if expression flag is set it returns only relative expression (without poejct id)"`
+	AbsoluteExpression  bool     `description:"if expression flag is set it returns only abslute  expression (with poejct id)"`
+}
+```
+
+##### GET method query string parameters request mapping
+ 
+ - mode: Mode
+ - meta: MetaURL
+ - dataset: DatasetID
+ - match: MatchingTables
+ - location: Location
+ - prune: PruneThresholdInSec
+ - loopback: LoopbackWindowInSec
+ - expr: Expression
+ - absExpr: AbsoluteExpression
+
+
+i.e: http://endpoint/WindowedTable?mode=r&meta=mybucket/xmeta&dataset=db1&expr=true
+
+## Window table snapshooting
+
+Mode request attribute controls table time window snapshooting, where r: take snapshot, w: persist snapshot.
+
+
+**Taking snapshot**
+     
+  - when meta file does not exists the service reads all matching table info and create temp meta file with range decorator expression
+  - when temp meta file exists the service returns range decorator expression from that file
+  - when meta file exists the services computes changes between meta file and recently updated table, it stores updated table info and range decorator expression in temp meta file
+
+**Persisting snapsho** 
+
+ - temp meta file is persisted to meta file.
+
+
 **Multi Read One Write scenario**
 
 The following shows example dataset windowing timeline:
@@ -63,9 +187,6 @@ The following shows example dataset windowing timeline:
     -   WindowedTable?mode=w&meta=bucket/x/meta.json&dataset=project:dataset&expr=true'
 
 
-### Endpoint invocation:
-
- TDD - add documentation here
 
 ## Usage
 
@@ -97,4 +218,6 @@ Disclaimer: Go Cloud function is only available at alpha at the moment, use the 
 - gcloud alpha functions deploy WindowedTable --entry-point Handle --runtime go111 --trigger-http
 
 
+
+## Running e2e test
 

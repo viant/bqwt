@@ -5,22 +5,24 @@ import (
 )
 
 type Meta struct {
-	URL                 string
-	DatasetID           string
-	Tables              []*WindowedTable
+	URL                string
+	DatasetID          string
+	Tables             []*WindowedTable
+	Expression         string `description:"represents recently changed tables ranged decorator relative expression (without project id)"`
+	AbsoluteExpression string `description:"represents recently changed tables ranged decorator absolute expression (with project id)"`
+
+	//internals
+	expressions         []string
+	absoluteExpressions []string
 	indexTables         map[string]*WindowedTable
-	Expressions         []string
-	AbsoluteExpressions []string
-	Expression          string
-	AbsoluteExpression  string
 	isTemp              bool
 }
 
 //Update updates table info
 func (m *Meta) Update(table *TableInfo, currentTime time.Time) *WindowedTable {
 	if len(m.indexTables) == 0 {
-		m.Expressions = []string{}
-		m.AbsoluteExpressions = []string{}
+		m.expressions = []string{}
+		m.absoluteExpressions = []string{}
 		m.indexTables = make(map[string]*WindowedTable)
 		for _, table := range m.Tables {
 			m.indexTables[table.Name] = table
@@ -31,8 +33,8 @@ func (m *Meta) Update(table *TableInfo, currentTime time.Time) *WindowedTable {
 		windowed = NewWindowedTable(table, currentTime)
 		m.indexTables[windowed.Name] = windowed
 		m.Tables = append(m.Tables, windowed)
-		m.Expressions = append(m.Expressions, windowed.Expression)
-		m.AbsoluteExpressions = append(m.AbsoluteExpressions, windowed.AbsoluteExpression)
+		m.expressions = append(m.expressions, windowed.Expression)
+		m.absoluteExpressions = append(m.absoluteExpressions, windowed.AbsoluteExpression)
 		return windowed
 	}
 
@@ -43,12 +45,12 @@ func (m *Meta) Update(table *TableInfo, currentTime time.Time) *WindowedTable {
 	nextBoundary := windowed.Window.To.Add(time.Millisecond)
 	windowed.Window.From = nextBoundary
 	windowed.Window.To = table.LastModified
-	windowed.LastChangedFlag = currentTime
+	windowed.LastChanged = currentTime
 	windowed.Expression = windowed.FormatExpr()
 	windowed.AbsoluteExpression = windowed.FormatAbsoluteExpr()
 	windowed.Changed = true
-	m.Expressions = append(m.Expressions, windowed.Expression)
-	m.AbsoluteExpressions = append(m.AbsoluteExpressions, windowed.AbsoluteExpression)
+	m.expressions = append(m.expressions, windowed.Expression)
+	m.absoluteExpressions = append(m.absoluteExpressions, windowed.AbsoluteExpression)
 	return windowed
 }
 
@@ -59,7 +61,7 @@ func (m *Meta) Prune(threshold time.Duration, now time.Time) {
 	}
 	var tables = make([]*WindowedTable, 0)
 	for _, candidate := range m.Tables {
-		if now.Sub(candidate.LastChangedFlag) > threshold {
+		if now.Sub(candidate.LastChanged) > threshold {
 			continue
 		}
 		tables = append(tables, candidate)
@@ -73,7 +75,7 @@ func NewMeta(URL, datasetID string) *Meta {
 		URL:                 URL,
 		DatasetID:           datasetID,
 		Tables:              make([]*WindowedTable, 0),
-		Expressions:         make([]string, 0),
-		AbsoluteExpressions: make([]string, 0),
+		expressions:         make([]string, 0),
+		absoluteExpressions: make([]string, 0),
 	}
 }

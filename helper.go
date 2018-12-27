@@ -119,7 +119,6 @@ func HandleRequest(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		handleError(err, w)
 	}
-
 }
 
 func handleError(err interface{}, w http.ResponseWriter) {

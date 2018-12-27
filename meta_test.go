@@ -41,7 +41,7 @@ func TestMeta_Update(t *testing.T) {
 					From: inThePast,
 					To:   now,
 				},
-				LastChangedFlag: now,
+				LastChanged: now,
 
 				Changed: true,
 			},
@@ -61,7 +61,7 @@ func TestMeta_Update(t *testing.T) {
 					From: inThePast,
 					To:   now,
 				},
-				LastChangedFlag: now,
+				LastChanged: now,
 
 				Changed: false,
 			},
@@ -82,18 +82,18 @@ func TestMeta_Update(t *testing.T) {
 					From: now.Add(time.Millisecond),
 					To:   inTheFuture,
 				},
-				LastChangedFlag: now,
-				Changed:         true,
+				LastChanged: now,
+				Changed:     true,
 			},
 		},
 	}
 
 	for _, useCase := range useCases {
-		useCase.meta.Expressions = make([]string, 0)
+		useCase.meta.expressions = make([]string, 0)
 		updated := useCase.meta.Update(useCase.tableInfo, now)
 		assert.Equal(t, useCase.expected, updated, useCase.description)
 		if useCase.expected.Changed {
-			assert.Equal(t, 1, len(useCase.meta.Expressions), useCase.description)
+			assert.Equal(t, 1, len(useCase.meta.expressions), useCase.description)
 		}
 	}
 

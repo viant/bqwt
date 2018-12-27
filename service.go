@@ -79,8 +79,8 @@ func (s *service) Handle(request *Request) *Response {
 func (s *service) processMeta(ctx context.Context, meta *Meta, request *Request, now time.Time) error {
 	pruneThreshold := time.Duration(request.PruneThresholdInSec) * time.Second
 	meta.Prune(pruneThreshold, now)
-	meta.Expression = strings.Join(meta.Expressions, ",")
-	meta.AbsoluteExpression = strings.Join(meta.AbsoluteExpressions, ",")
+	meta.Expression = strings.Join(meta.expressions, ",")
+	meta.AbsoluteExpression = strings.Join(meta.absoluteExpressions, ",")
 
 	var err error
 	switch request.Mode {

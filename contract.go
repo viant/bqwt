@@ -7,15 +7,15 @@ import (
 
 //Request represents a request for windowed tables
 type Request struct {
-	Mode                string   `description:"r|w|rw"`
-	MetaURL             string   `description:"meta-file location"`
+	Mode                string   `description:"operation mode: r - take snapshot, w - persist snapshot"`
+	MetaURL             string   `description:"meta-file location, if relative path is used it adds gs:// protocol"`
 	Location            string   `description:"dataset location"`
 	DatasetID           string   `description:"source dataset"`
 	MatchingTables      []string `description:"matching table contain expression"`
 	PruneThresholdInSec int      `description:"max allowed duration in sec for unchanged windowed tables before removing"`
 	LoopbackWindowInSec int      `description:"dataset max loopback window for checking changed tables in supplied dataset"`
-	Expression          bool     `description:"if expression flag is set it returns only expression"`
-	AbsoluteExpression  bool     `description:"if set expression include project name"`
+	Expression          bool     `description:"if expression flag is set it returns only relative expression (without poejct id)"`
+	AbsoluteExpression  bool     `description:"if expression flag is set it returns only abslute  expression (with poejct id)"`
 }
 
 func (r Request) IsRead() bool {

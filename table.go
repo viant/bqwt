@@ -12,7 +12,7 @@ type WindowedTable struct {
 	Name               string
 	Dataset            string
 	Window             *TimeWindow
-	LastChangedFlag    time.Time
+	LastChanged        time.Time
 	Changed            bool
 	Expression         string `description:"represents table ranged decorator table windowed expression"`
 	AbsoluteExpression string `description:"represents absolute table path ranged decorator table windowed expression"`
@@ -39,12 +39,12 @@ func (t *WindowedTable) FormatAbsoluteExpr() string {
 //NewWindowedTable creates a new windowed table for supplied table info
 func NewWindowedTable(info *TableInfo, now time.Time) *WindowedTable {
 	var result = &WindowedTable{
-		ID:              fmt.Sprintf("%v.%v", info.DatasetID, info.TableID),
-		Dataset:         info.DatasetID,
-		ProjectID:       info.ProjectID,
-		Name:            info.TableID,
-		LastChangedFlag: now,
-		Changed:         true,
+		ID:          fmt.Sprintf("%v.%v", info.DatasetID, info.TableID),
+		Dataset:     info.DatasetID,
+		ProjectID:   info.ProjectID,
+		Name:        info.TableID,
+		LastChanged: now,
+		Changed:     true,
 		Window: &TimeWindow{
 			From: info.Created,
 			To:   info.LastModified,
