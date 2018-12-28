@@ -259,7 +259,7 @@ public class SQLProvider implements ValueProvider<String>, Serializable {
 ```java
 public class Main {
     
-        public static final String EMPTY_QUERY = "SELECT * FROM (SELECT INTEGER(NULL) AS id,  STRING(NULL) AS name) WHERE 1 = 0";
+        public static final String EMPTY_QUERY = "SELECT * FROM (SELECT INTEGER(NULL) AS field1,  STRING(NULL) AS fieldN) WHERE 1 = 0";
         public static final String WINDOWED_TABLE_URL = "http://myEndpoint/WindowedTable?mode=r&meta=myBucket/meta&dataset=myDataset";
         public static final String SQL = "SELECT * FROM $SOURCE";
          public static final Strin TABLE = "myTable";
