@@ -342,7 +342,7 @@ Disclaimer: Go Cloud function is only available at alpha at the moment, use the 
 Windowing table with range decorator is only supported with legacy SQL, thus only non-partition, non-clustered tables run with legacySQL.
 
 - **Substantial data delay with streaming insert method**
-In case of using streaming insert method,  data first arrive to streaming buffer, which  retains recently inserted rows. The buffer is optimized for high-throughput.
+In case of using streaming insert method,  data first arrive to streaming buffer, which  retains recently inserted rows. 
 While query engine has ability to read records directly from the streaming buffer, these records are not considered for copy, extract job or range decorators.
 With this in mind this API uses StreamingBuffer.OldestEntryTime - 1 as table time window upper bound.
 
