@@ -1,0 +1,1 @@
+processing time window table with stream insert method

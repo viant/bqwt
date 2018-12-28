@@ -1,0 +1,147 @@
+pipeline:
+  init:
+    removeMeta:
+      action: storage:remove
+      assets:
+        - URL: file:///tmp/e2e-meta1
+        - URL: file:///tmp/e2e-meta1-tmp
+        - URL: file:///tmp/e2e-meta2
+        - URL: file:///tmp/e2e-meta2-tmp
+
+    data:
+      action: run
+      request: '@data_init'
+      comments: set initial app state
+
+  test:
+    tag: Test
+    description: '@use_case'
+    subPath: 'use_cases/${index}*'
+    range: 1..002
+    template:
+      setVars:
+        action: nop
+        skip: $HasResource(${subPath}/skip.txt)
+        init:
+          i: $AsInt($index)
+          method:  '$i = 2  ?  stream : load'
+          meta: $QueryEscape('file:///tmp/e2e-meta$i')
+
+      loadBatch1:
+        when: '$HasResource(${path}/prepare_${prepareStep}/${db})'
+        action: dsunit:prepare
+        comments: populate data with first data batch
+        request: '@req/prepare'
+        db: db1
+        prepareStep: 1
+
+
+      takeSnapshot1:
+        action: http/runner:send
+        comments: take a range decorator snapshot (temp meta file is created)
+        requests:
+          - URL: http://127.0.0.1:8080/WindowedTable?mode=r&meta=$meta&method=${method}&dataset=db1&match=table${i}&expr=true
+            expect:
+              Code: 200
+              Body: /table${i}/
+        post:
+          checkSQL: SELECT /* USE LEGACY SQL */ COUNT(*) AS cnt FROM  ${Responses[0].Body}
+
+      assertMatchBatch1:
+        action: dsunit:query
+        comments: check row count in time windowed table
+        datastore: db1
+        SQL: $checkSQL
+        expect:
+          - cnt: 2
+
+      persistSnapshot1:
+        action: http/runner:send
+        comments: persist processed snapshot by moving temp meta to meta file
+        requests:
+          - URL: http://127.0.0.1:8080/WindowedTable?mode=w&meta=$meta&dataset=db1&match=table${i}&expr=true
+            expect:
+              Code: 200
+
+      loadBatch2:
+        when: '$HasResource(${path}/prepare_${prepareStep}/${db})'
+        action: dsunit:prepare
+        comments: populate data with second data batch
+        request: '@req/prepare'
+        db: db1
+        prepareStep: 2
+
+
+
+      takeSnapshot2:
+        action: http/runner:send
+        comments: take another range decorator snapshot
+        requests:
+          - URL: http://127.0.0.1:8080/WindowedTable?mode=r&meta=$meta&method=${method}&dataset=db1&match=table${i}&expr=true
+            expect:
+              Code: 200
+              Body: /table${i}/
+
+        post:
+          checkSQL: SELECT /* USE LEGACY SQL */ COUNT(*) AS cnt FROM  ${Responses[0].Body}
+
+
+      assertMatchBatch2:
+        action: dsunit:query
+        comments: check row count in time windowed table
+        datastore: db1
+        SQL: $checkSQL
+        expect:
+          - cnt: 3
+
+      persistSnapshot2:
+        action: http/runner:send
+        comments: persist another snapshot
+        requests:
+          - URL: http://127.0.0.1:8080/WindowedTable?mode=w&meta=$meta&dataset=db1&match=table${i}&expr=true
+            expect:
+              Code: 200
+
+
+      loadBatch3:
+        when: '$HasResource(${path}/prepare_${prepareStep}/${db})'
+        action: dsunit:prepare
+        request: '@req/prepare'
+        db: db1
+        prepareStep: 3
+        timeSleepMs: 2000
+        comments: populate data with the third data batch
+
+      takeSnapshot3:
+        action: http/runner:send
+        comments: take another range decorator snapshot
+        requests:
+          - URL: http://127.0.0.1:8080/WindowedTable?mode=r&meta=$meta&method=${method}&dataset=db1&match=table${i}&expr=true
+            expect:
+              Code: 200
+              Body: /table${i}/
+        post:
+          checkSQL: SELECT /* USE LEGACY SQL */ COUNT(*) AS cnt FROM  ${Responses[0].Body}
+
+      assertMatchBatch3:
+        action: dsunit:query
+        comments: check row count in time windowed table
+        datastore: db1
+        SQL: $checkSQL
+        expect:
+          - cnt: 4
+
+      persistSnapshot3:
+        action: http/runner:send
+        comments: persist another snapshot
+        requests:
+          - URL: http://127.0.0.1:8080/WindowedTable?mode=w&meta=$meta&dataset=db1&match=table${i}&expr=true
+            expect:
+              Code: 200
+
+
+
+    post-test-sleep:
+      action: nop
+      sleepTimeMs: 1000
+      comments: sleep for extra debuging

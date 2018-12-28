@@ -1,0 +1,2 @@
+This use case can not easily be produced, since streaming buffer flush delay can not be evaluated.
+While this use case has been developed it has been tried to stream dozen of millions records without achieving small acceptable buffer flush delay.

@@ -1,0 +1,70 @@
+tasks: $tasks
+init:
+  buildTarget:
+    URL: scp://127.0.0.1/tmp/build/${app}/
+    credentials: localhost
+
+  appTarget:
+    URL: scp://127.0.0.1/opt/${app}/
+    credentials: localhost
+
+  target:
+    URL: scp://127.0.0.1/
+    credentials: localhost
+
+defaults:
+  target: $target
+
+pipeline:
+  build:
+    checkout:
+      action: version/control:checkout
+      origin:
+        URL: ./../
+      dest: $buildTarget
+
+    set-sdk:
+      action: sdk:set
+      sdk: go:1.11
+
+
+    build-app:
+      action: exec:run
+      commands:
+        - cd /tmp/build/${app}/server
+        - go build ${app}.go
+        - chmod +x ${app}
+
+
+    deploy:
+      mkdir:
+        action: exec:run
+        commands:
+          - sudo rm -rf /opt/${app}/
+          - sudo mkdir -p /opt/${app}
+          - sudo chown -R ${os.user} /opt/${app}
+
+      install:
+        action: storage:copy
+        source: $buildTarget
+        dest: $appTarget
+        assets:
+          server/${app}: ${app}
+
+
+  stop:
+    action: process:stop-all
+    input: ${app}
+
+  start:
+    action: process:start
+    directory: /opt/${app}
+    immuneToHangups: true
+    command: ./${app}
+    arguments:
+      - '-port'
+      - 8080
+
+    options:
+      env:
+        GOOGLE_APPLICATION_CREDENTIALS: ${env.HOME}/.secret/${bqCredentials}.json

@@ -1,0 +1,13 @@
+pipeline:
+  db1-load:
+    register:
+      action: dsunit:register
+      datastore: db1
+      config:
+        driverName: bigquery
+        credentials: $bqCredentials
+        parameters:
+          datasetId: db1
+          table1.insertMethod: load
+          table2.insertMethod: stream
+          streamBatchCount: 4096

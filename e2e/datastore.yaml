@@ -1,0 +1,12 @@
+pipeline:
+  create-db:
+    db1:
+      action: dsunit:init
+      datastore: db1
+      config:
+        driverName: bigquery
+        credentials: $bqCredentials
+        parameters:
+          datasetId: db1
+      scripts:
+      - URL: datastore/db1/schema.sql
