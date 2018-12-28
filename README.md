@@ -353,7 +353,7 @@ Find out more about [streaming lifecycle](https://cloud.google.com/blog/products
 
 ## Running e2e tests
 
-Create a test project and service account with admin permission.
+Create a 'test' Big Query project and service account with admin permission.
 Enable ssh on test host and create [localhost secret](https://github.com/viant/endly/tree/master/doc/secrets#ssh-credentials)
  
 Create a test [BQ service account secrets](https://github.com/viant/endly/tree/master/doc/secrets#google-cloud-credentials), save it as ~/.secret/bq-e2e.json
