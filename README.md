@@ -285,12 +285,12 @@ public class Main {
                                    // Transforms each row inserted to an Integer of value 1
                                    .apply(ParDo.of(countRows()))
                                    .apply(Sum.integersGlobally())
-                                   .apply(ParDo.of(new PersistSnapshpot()));
+                                   .apply(ParDo.of(new SnapshpotUpdater()));
        }
 
        
        
-       public static class  PersistSnapshpot extends DoFn<Integer, Void> implements Serializable{
+       public static class  SnapshpotUpdater extends DoFn<Integer, Void> implements Serializable{
                 private final String notificationURL = "http://myEndpoint/WindowedTable?mode=w&meta=myBucket/meta&dataset=myDataset";
     
                @ProcessElement
