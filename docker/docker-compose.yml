@@ -1,0 +1,13 @@
+version: "3.2"
+services:
+  dbtransfer:
+    container_name: bqwt
+    image: viant/bqwt:1.0
+    command: ["/bqwt/server/bqwt"]
+    ports:
+      - 8080:8080
+    volumes:
+      - ${HOME}/.secret/:/root/.secret/
+    network_mode: bridge
+    environment:
+      - GOOGLE_APPLICATION_CREDENTIALS=/root/.secret/bq-e2e.json
