@@ -278,7 +278,6 @@ public class Main {
                                    .withSchema(Helper.getTableSchema())
                                    .withMethod(BigQueryIO.Write.Method.STREAMING_INSERTS)
                                    .withCreateDisposition(BigQueryIO.Write.CreateDisposition.CREATE_IF_NEEDED));
-            
 
 
             //Persist window table snapshot after writing to a table
@@ -326,7 +325,7 @@ cd docker/
 docker-compose up -d
 ```
 
-#### Google cloud deployment
+#### Google cloud function deployment
 
 Disclaimer: Go Cloud function is only available at alpha at the moment, use the following [form](https://docs.google.com/forms/d/e/1FAIpQLSfJ08R2z7FumQyYGGuTyK4x5M-6ch7WmJ_3uWYI5SdZUb5SBw/viewform) to apply for early access.
 
