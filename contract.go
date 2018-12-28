@@ -16,6 +16,7 @@ type Request struct {
 	LoopbackWindowInSec int      `description:"dataset max loopback window for checking changed tables in supplied dataset"`
 	Expression          bool     `description:"if expression flag is set it returns only relative expression (without poejct id)"`
 	AbsoluteExpression  bool     `description:"if expression flag is set it returns only abslute  expression (with poejct id)"`
+	Method              string   `description:"data insert method: stream or load by default"`
 }
 
 func (r Request) IsRead() bool {
@@ -39,6 +40,9 @@ func (r *Request) Init() error {
 	}
 	if r.MetaURL != "" && !strings.Contains(r.MetaURL, "://") {
 		r.MetaURL = "gs://" + r.MetaURL
+	}
+	if r.Method == "" {
+		r.Method = "load"
 	}
 	return nil
 }

@@ -66,8 +66,17 @@ func (s *service) Handle(request *Request) *Response {
 		err = s.processMeta(ctx, response.Meta, request, now)
 		response.SetErrorIfNeeded(err)
 	}()
-	if len(tablesInfo) == 0 {
+
+	if len(tablesInfo) == 0 || response.Meta.isTemp {
 		return response
+	}
+
+	if request.Method == "stream" {
+		info, err := s.getStreamTablesInfo(ctx, tablesInfo, response.Meta.Tables)
+		if response.SetErrorIfNeeded(err) {
+			return response
+		}
+		tablesInfo = info
 	}
 
 	for _, info := range tablesInfo {
@@ -108,6 +117,40 @@ func (s *service) uploadMeta(ctx context.Context, URL string, meta *Meta) error 
 		err = UploadGSContent(ctx, URL, bytes.NewReader(data))
 	}
 	return err
+}
+
+func (s *service) getStreamTablesInfo(ctx context.Context, infos []*TableInfo, tables []*WindowedTable) ([]*TableInfo, error) {
+	var tableByName = make(map[string]*TableInfo)
+	if len(infos) > 0 {
+		for _, info := range infos {
+			tableByName[info.TableID] = info
+			meta, err := GetTableMeta(ctx, info.ProjectID, info.DatasetID, info.TableID)
+			if err != nil {
+				return nil, err
+			}
+			if meta.StreamingBuffer != nil {
+				info.LastModified = meta.StreamingBuffer.OldestEntryTime.Add(-time.Millisecond)
+			}
+		}
+	}
+	if len(tables) > 0 {
+		for _, table := range tables {
+			if _, has := tableByName[table.Name]; has {
+				continue
+			}
+			if meta, err := GetTableMeta(ctx, table.ProjectID, table.Dataset, table.Name); err == nil {
+				if meta.StreamingBuffer != nil {
+					tableByName[table.Name] = NewTableInfo(table.ProjectID, table.Dataset, table.Name, table.Window.From, meta.StreamingBuffer.OldestEntryTime.Add(-time.Millisecond))
+
+				}
+			}
+		}
+	}
+	var result = make([]*TableInfo, 0)
+	for _, v := range tableByName {
+		result = append(result, v)
+	}
+	return result, nil
 }
 
 //New creates a new windowed table service

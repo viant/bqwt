@@ -18,7 +18,7 @@ func TestMeta_Update(t *testing.T) {
 	toFuture := inTheFuture.UnixNano() / int64(time.Millisecond)
 
 	useCase2Meta := NewMeta("gs://bucket/meta.json", "dataset")
-	useCase2Meta.Update(NewTableInfo("dataset", "tableX", inThePast, now), now)
+	useCase2Meta.Update(NewTableInfo("p", "dataset", "tableX", inThePast, now), now)
 
 	var useCases = []struct {
 		description string
@@ -29,13 +29,14 @@ func TestMeta_Update(t *testing.T) {
 		{
 			description: "new table",
 			meta:        NewMeta("gs://bucket/meta.json", "dataset"),
-			tableInfo:   NewTableInfo("dataset", "tableX", inThePast, now),
+			tableInfo:   NewTableInfo("p", "dataset", "tableX", inThePast, now),
 			expected: &WindowedTable{
 				ID:                 "dataset.tableX",
+				ProjectID:          "p",
 				Name:               "tableX",
 				Dataset:            "dataset",
 				Expression:         fmt.Sprintf("[dataset.tableX@%v-%v]", from, to),
-				AbsoluteExpression: fmt.Sprintf("[dataset.tableX@%v-%v]", from, to),
+				AbsoluteExpression: fmt.Sprintf("[p:dataset.tableX@%v-%v]", from, to),
 
 				Window: &TimeWindow{
 					From: inThePast,
@@ -50,13 +51,14 @@ func TestMeta_Update(t *testing.T) {
 		{
 			description: "existing table no update",
 			meta:        useCase2Meta,
-			tableInfo:   NewTableInfo("dataset", "tableX", inThePast, now),
+			tableInfo:   NewTableInfo("p", "dataset", "tableX", inThePast, now),
 			expected: &WindowedTable{
 				ID:                 "dataset.tableX",
+				ProjectID:          "p",
 				Name:               "tableX",
 				Dataset:            "dataset",
 				Expression:         fmt.Sprintf("[dataset.tableX@%v-%v]", from, to),
-				AbsoluteExpression: fmt.Sprintf("[dataset.tableX@%v-%v]", from, to),
+				AbsoluteExpression: fmt.Sprintf("[p:dataset.tableX@%v-%v]", from, to),
 				Window: &TimeWindow{
 					From: inThePast,
 					To:   now,
@@ -70,13 +72,14 @@ func TestMeta_Update(t *testing.T) {
 		{
 			description: "existing table changing update",
 			meta:        useCase2Meta,
-			tableInfo:   NewTableInfo("dataset", "tableX", now, inTheFuture),
+			tableInfo:   NewTableInfo("p", "dataset", "tableX", now, inTheFuture),
 			expected: &WindowedTable{
 				ID:                 "dataset.tableX",
+				ProjectID:          "p",
 				Name:               "tableX",
 				Dataset:            "dataset",
 				Expression:         fmt.Sprintf("[dataset.tableX@%v-%v]", to+1, toFuture),
-				AbsoluteExpression: fmt.Sprintf("[dataset.tableX@%v-%v]", to+1, toFuture),
+				AbsoluteExpression: fmt.Sprintf("[p:dataset.tableX@%v-%v]", to+1, toFuture),
 
 				Window: &TimeWindow{
 					From: now.Add(time.Millisecond),
@@ -106,8 +109,8 @@ func TestMeta_Prune(t *testing.T) {
 	now := time.Now()
 
 	meta := NewMeta("gs://bucket/meta.json", "dataset")
-	meta.Update(NewTableInfo("dataset", "tableX", inThePast, now), now)
-	meta.Update(NewTableInfo("dataset", "tableY", agesAgo, inThePast), inThePast)
+	meta.Update(NewTableInfo("p", "dataset", "tableX", inThePast, now), now)
+	meta.Update(NewTableInfo("p", "dataset", "tableY", agesAgo, inThePast), inThePast)
 	{ //no prune
 		meta.Prune(0, now)
 		assert.Equal(t, 2, len(meta.Tables))

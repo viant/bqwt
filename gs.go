@@ -3,24 +3,29 @@ package bqwt
 import (
 	"cloud.google.com/go/storage"
 	"context"
-	"fmt"
 	"io"
 	"io/ioutil"
 	"net/url"
+	"os"
 )
 
 //DownloadGSContent returns google storage content
 func DownloadGSContent(ctx context.Context, URL string) ([]byte, error) {
-	client, err := storage.NewClient(ctx)
-	if err != nil {
-		fmt.Printf("err: %v\n", err)
-		return nil, err
-	}
 	parsedURL, err := url.Parse(URL)
 	if err != nil {
 		return nil, err
 	}
-
+	if parsedURL.Scheme == "file" {
+		content, err := ioutil.ReadFile(parsedURL.Path)
+		if err != nil {
+			return nil, reclassifyNotFoundIfMatched(err, URL)
+		}
+		return content, err
+	}
+	client, err := storage.NewClient(ctx)
+	if err != nil {
+		return nil, err
+	}
 	bucket := client.Bucket(parsedURL.Host)
 	objectPath := string(parsedURL.Path[1:])
 	rc, err := bucket.Object(objectPath).NewReader(ctx)
@@ -38,15 +43,22 @@ func DownloadGSContent(ctx context.Context, URL string) ([]byte, error) {
 
 //UploadGSContent uploads content to gs
 func UploadGSContent(ctx context.Context, URL string, reader io.Reader) error {
-	client, err := storage.NewClient(ctx)
-	if err != nil {
-		return err
-	}
 	parsedURL, err := url.Parse(URL)
 	if err != nil {
 		return err
 	}
+	if parsedURL.Scheme == "file" {
+		data, err := ioutil.ReadAll(reader)
+		if err != nil {
+			return err
+		}
+		return ioutil.WriteFile(parsedURL.Path, data, 0777)
+	}
 
+	client, err := storage.NewClient(ctx)
+	if err != nil {
+		return err
+	}
 	bucket := client.Bucket(parsedURL.Host)
 	objectPath := string(parsedURL.Path[1:])
 	writer := bucket.Object(objectPath).NewWriter(ctx)
@@ -58,11 +70,15 @@ func UploadGSContent(ctx context.Context, URL string, reader io.Reader) error {
 
 //ExistsGSObject returns true if  gs object exists
 func ExistsGSObject(ctx context.Context, URL string) bool {
-	client, err := storage.NewClient(ctx)
+	parsedURL, err := url.Parse(URL)
 	if err != nil {
 		return false
 	}
-	parsedURL, err := url.Parse(URL)
+	if parsedURL.Scheme == "file" {
+		_, err := os.Stat(parsedURL.Path)
+		return err == nil
+	}
+	client, err := storage.NewClient(ctx)
 	if err != nil {
 		return false
 	}
@@ -75,11 +91,15 @@ func ExistsGSObject(ctx context.Context, URL string) bool {
 
 //DeleteGSObject delete gs object
 func DeleteGSObject(ctx context.Context, URL string) error {
-	client, err := storage.NewClient(ctx)
+	parsedURL, err := url.Parse(URL)
 	if err != nil {
 		return err
 	}
-	parsedURL, err := url.Parse(URL)
+	if parsedURL.Scheme == "file" {
+		err = os.Remove(parsedURL.Path)
+		return err
+	}
+	client, err := storage.NewClient(ctx)
 	if err != nil {
 		return err
 	}

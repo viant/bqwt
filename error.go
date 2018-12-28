@@ -27,7 +27,7 @@ func reclassifyNotFoundIfMatched(err error, URL string) error {
 	if err == nil {
 		return nil
 	}
-	if strings.Contains(err.Error(), "doesn't exist") {
+	if strings.Contains(err.Error(), "doesn't exist") || strings.Contains(err.Error(), "no such file or directory") {
 		return &NotFoundError{URL: URL}
 	}
 	return err

@@ -55,6 +55,14 @@ func RunBQQuery(ctx context.Context, project, datasetLocation string, SQL string
 	return nil
 }
 
+func GetTableMeta(ctx context.Context, project, dataset, table string) (*bigquery.TableMetadata, error) {
+	client, err := bigquery.NewClient(ctx, project)
+	if err != nil {
+		return nil, err
+	}
+	return client.Dataset(dataset).Table(table).Metadata(ctx)
+}
+
 func AsString(value bigquery.Value) string {
 	if text, ok := value.(string); ok {
 		return text

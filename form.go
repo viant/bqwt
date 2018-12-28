@@ -9,6 +9,7 @@ import (
 
 type FormFields struct {
 	Meta         string
+	Method       string
 	Dataset      string
 	Mode         string
 	Match        string
@@ -43,7 +44,7 @@ func (f *FormFields) AsRequest() (*Request, error) {
 	request.Mode = f.Mode
 	request.MatchingTables = strings.Split(f.Match, ",")
 	request.Location = f.Location
-
+	request.Method = f.Method
 	request.Expression = toolbox.AsBoolean(f.Expr)
 	request.AbsoluteExpression = toolbox.AsBoolean(f.AbsoluteExpr)
 
@@ -68,6 +69,7 @@ func NewFormFields(request *http.Request) (*FormFields, error) {
 		return nil, fmt.Errorf("form field were empty")
 	}
 	return &FormFields{
+		Method:       request.Form.Get("method"),
 		Meta:         request.Form.Get("meta"),
 		Dataset:      request.Form.Get("dataset"),
 		Mode:         request.Form.Get("mode"),

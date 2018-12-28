@@ -11,8 +11,10 @@ type TableInfo struct {
 	LastModified time.Time
 }
 
-func NewTableInfo(datasetID string, tableID string, created time.Time, lastModified time.Time) *TableInfo {
+//NewTableInfo creates a new table info
+func NewTableInfo(projectId, datasetID string, tableID string, created time.Time, lastModified time.Time) *TableInfo {
 	return &TableInfo{
+		ProjectID:    projectId,
 		DatasetID:    datasetID,
 		TableID:      tableID,
 		Created:      created,
