@@ -338,7 +338,7 @@ Disclaimer: Go Cloud function is only available at alpha at the moment, use the 
 
 ## Known limitation
 
-- **Non partition/clustering**
+- **Non partitioning/clustering**
 Windowing table is only possible legacy SQL, thus only non-partition, non-clustered tables are supported at the moment.
 
 - **Substantial data delay with streaming insert method**
