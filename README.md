@@ -339,7 +339,7 @@ Disclaimer: Go Cloud function is only available at alpha at the moment, use the 
 ## Known limitation
 
 - **Non partitioning/clustering**
-Windowing table with range decorator is only supported with legacy SQL, thus only non-partition, non-clustered tables are supported at the moment.
+Windowing table with range decorator is only supported with legacy SQL, thus only non-partition, non-clustered tables run with legacySQL.
 
 - **Substantial data delay with streaming insert method**
 In case of using streaming insert method,  data first arrive to streaming buffer, which  retains recently inserted rows. The buffer is optimized for high-throughput.
