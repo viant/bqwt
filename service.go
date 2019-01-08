@@ -38,8 +38,9 @@ func (s *service) loadMetaFile(ctx context.Context, URL, datasetID string) (*Met
 		}
 		return nil, err
 	}
-	err = json.NewDecoder(bytes.NewReader(content)).Decode(result)
-	result.isTemp = true
+	if err = json.NewDecoder(bytes.NewReader(content)).Decode(result); err == nil {
+		result.isTemp = true
+	}
 	return result, err
 }
 
@@ -55,7 +56,7 @@ func (s *service) Handle(request *Request) *Response {
 	ctx := context.Background()
 	var tablesInfo []*TableInfo
 	response.Meta, err = s.loadMetaFile(ctx, request.MetaURL, request.DatasetID)
-	if err == nil && !response.Meta.isTemp && request.IsRead() {
+	if err == nil && ! response.Meta.isTemp && request.IsRead() {
 		tablesInfo, err = s.getTablesInfo(ctx, request)
 	}
 	if response.SetErrorIfNeeded(err) {
@@ -88,9 +89,18 @@ func (s *service) Handle(request *Request) *Response {
 func (s *service) processMeta(ctx context.Context, meta *Meta, request *Request, now time.Time) error {
 	pruneThreshold := time.Duration(request.PruneThresholdInSec) * time.Second
 	meta.Prune(pruneThreshold, now)
-	meta.Expression = strings.Join(meta.expressions, ",")
-	meta.AbsoluteExpression = strings.Join(meta.absoluteExpressions, ",")
-
+	if request.IsRead() {
+		var expressions= make([]string, 0)
+		var absoluteExpressions= make([]string, 0)
+		for _, table := range meta.Tables {
+			if table.Changed {
+				expressions = append(expressions, table.Expression)
+				absoluteExpressions = append(absoluteExpressions, table.AbsoluteExpression)
+			}
+		}
+		meta.Expression = strings.Join(expressions, ",")
+		meta.AbsoluteExpression = strings.Join(absoluteExpressions, ",")
+	}
 	var err error
 	switch request.Mode {
 	case "r":

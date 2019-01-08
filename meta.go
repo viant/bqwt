@@ -11,9 +11,6 @@ type Meta struct {
 	Expression         string `description:"represents recently changed tables ranged decorator relative expression (without project id)"`
 	AbsoluteExpression string `description:"represents recently changed tables ranged decorator absolute expression (with project id)"`
 
-	//internals
-	expressions         []string
-	absoluteExpressions []string
 	indexTables         map[string]*WindowedTable
 	isTemp              bool
 }
@@ -21,8 +18,6 @@ type Meta struct {
 //Update updates table info
 func (m *Meta) Update(table *TableInfo, currentTime time.Time) *WindowedTable {
 	if len(m.indexTables) == 0 {
-		m.expressions = []string{}
-		m.absoluteExpressions = []string{}
 		m.indexTables = make(map[string]*WindowedTable)
 		for _, table := range m.Tables {
 			m.indexTables[table.Name] = table
@@ -33,8 +28,6 @@ func (m *Meta) Update(table *TableInfo, currentTime time.Time) *WindowedTable {
 		windowed = NewWindowedTable(table, currentTime)
 		m.indexTables[windowed.Name] = windowed
 		m.Tables = append(m.Tables, windowed)
-		m.expressions = append(m.expressions, windowed.Expression)
-		m.absoluteExpressions = append(m.absoluteExpressions, windowed.AbsoluteExpression)
 		return windowed
 	}
 
@@ -49,8 +42,6 @@ func (m *Meta) Update(table *TableInfo, currentTime time.Time) *WindowedTable {
 	windowed.Expression = windowed.FormatExpr()
 	windowed.AbsoluteExpression = windowed.FormatAbsoluteExpr()
 	windowed.Changed = true
-	m.expressions = append(m.expressions, windowed.Expression)
-	m.absoluteExpressions = append(m.absoluteExpressions, windowed.AbsoluteExpression)
 	return windowed
 }
 
@@ -75,7 +66,5 @@ func NewMeta(URL, datasetID string) *Meta {
 		URL:                 URL,
 		DatasetID:           datasetID,
 		Tables:              make([]*WindowedTable, 0),
-		expressions:         make([]string, 0),
-		absoluteExpressions: make([]string, 0),
 	}
 }
