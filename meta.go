@@ -11,8 +11,8 @@ type Meta struct {
 	Expression         string `description:"represents recently changed tables ranged decorator relative expression (without project id)"`
 	AbsoluteExpression string `description:"represents recently changed tables ranged decorator absolute expression (with project id)"`
 
-	indexTables         map[string]*WindowedTable
-	isTemp              bool
+	indexTables map[string]*WindowedTable
+	isTemp      bool
 }
 
 //Update updates table info
@@ -63,8 +63,8 @@ func (m *Meta) Prune(threshold time.Duration, now time.Time) {
 //NewMeta creates a new window table meta instance
 func NewMeta(URL, datasetID string) *Meta {
 	return &Meta{
-		URL:                 URL,
-		DatasetID:           datasetID,
-		Tables:              make([]*WindowedTable, 0),
+		URL:       URL,
+		DatasetID: datasetID,
+		Tables:    make([]*WindowedTable, 0),
 	}
 }

@@ -56,7 +56,7 @@ func (s *service) Handle(request *Request) *Response {
 	ctx := context.Background()
 	var tablesInfo []*TableInfo
 	response.Meta, err = s.loadMetaFile(ctx, request.MetaURL, request.DatasetID)
-	if err == nil && ! response.Meta.isTemp && request.IsRead() {
+	if err == nil && !response.Meta.isTemp && request.IsRead() {
 		tablesInfo, err = s.getTablesInfo(ctx, request)
 	}
 	if response.SetErrorIfNeeded(err) {
@@ -90,8 +90,8 @@ func (s *service) processMeta(ctx context.Context, meta *Meta, request *Request,
 	pruneThreshold := time.Duration(request.PruneThresholdInSec) * time.Second
 	meta.Prune(pruneThreshold, now)
 	if request.IsRead() {
-		var expressions= make([]string, 0)
-		var absoluteExpressions= make([]string, 0)
+		var expressions = make([]string, 0)
+		var absoluteExpressions = make([]string, 0)
 		for _, table := range meta.Tables {
 			if table.Changed {
 				expressions = append(expressions, table.Expression)
