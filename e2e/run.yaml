@@ -4,7 +4,7 @@ init:
     URL: ssh://127.0.0.1/
     credentials: localhost
   appHost: $Hostname($target.URL)
-  bqCredentials: bq-e2e
+  bqCredentials: viant-e2e
 defaults:
   app: $app
   target: $target

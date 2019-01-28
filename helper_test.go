@@ -19,9 +19,11 @@ func TestGetTableInfo(t *testing.T) {
 		}
 	}
 
-	info, err := GetTablesInfo(ctx, projectID, "testdb", "", loopBackTime, []string{"dummy"})
+	info, err := GetTablesInfo(ctx, projectID, "testdb", "", loopBackTime)
 	assert.Nil(t, err)
-	assert.True(t, len(info) > 0)
+	if !assert.True(t, len(info) > 0) {
+		return
+	}
 	assert.Equal(t, "dummy", info[0].TableID)
 	assert.Equal(t, "testdb", info[0].DatasetID)
 

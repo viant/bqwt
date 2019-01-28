@@ -8,7 +8,6 @@ import (
 	"net/http"
 )
 
-
 var port = flag.String("port", "8080", "endpoint port")
 
 func main() {
@@ -21,7 +20,7 @@ func main() {
 
 //StartServer start service
 func StartServer(port string, handler http.HandlerFunc) error {
-	httpServer := &http.Server{Addr: ":"+port, Handler: handler}
+	httpServer := &http.Server{Addr: ":" + port, Handler: handler}
 	fmt.Printf("Starting server on %v\n", port)
 	return httpServer.ListenAndServe()
 }

@@ -1,6 +1,7 @@
 package bqwt
 
 import (
+	"strings"
 	"time"
 )
 
@@ -10,9 +11,24 @@ type Meta struct {
 	Tables             []*WindowedTable
 	Expression         string `description:"represents recently changed tables ranged decorator relative expression (without project id)"`
 	AbsoluteExpression string `description:"represents recently changed tables ranged decorator absolute expression (with project id)"`
+	indexTables        map[string]*WindowedTable
+	isTemp             bool
+}
 
-	indexTables map[string]*WindowedTable
-	isTemp      bool
+func (m *Meta) Match(matchExpressions []string) []*WindowedTable {
+	if len(matchExpressions) == 0 {
+		return m.Tables
+	}
+	var result = make([]*WindowedTable, 0)
+	for _, candidate := range m.Tables {
+		for _, expression := range matchExpressions {
+			if strings.Contains(candidate.Name, expression) {
+				result = append(result, candidate)
+				break
+			}
+		}
+	}
+	return result
 }
 
 //Update updates table info

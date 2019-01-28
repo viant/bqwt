@@ -22,7 +22,7 @@ func (s *service) getTablesInfo(ctx context.Context, request *Request) ([]*Table
 		return nil, err
 	}
 	loopBackTime := time.Now().Add(-time.Second * time.Duration(request.LoopbackWindowInSec))
-	return GetTablesInfo(ctx, projectID, request.DatasetID, request.Location, loopBackTime, request.MatchingTables)
+	return GetTablesInfo(ctx, projectID, request.DatasetID, request.Location, loopBackTime)
 }
 
 func (s *service) loadMetaFile(ctx context.Context, URL, datasetID string) (*Meta, error) {
@@ -92,7 +92,7 @@ func (s *service) processMeta(ctx context.Context, meta *Meta, request *Request,
 	if request.IsRead() {
 		var expressions = make([]string, 0)
 		var absoluteExpressions = make([]string, 0)
-		for _, table := range meta.Tables {
+		for _, table := range meta.Match(request.MatchingTables) {
 			if table.Changed {
 				expressions = append(expressions, table.Expression)
 				absoluteExpressions = append(absoluteExpressions, table.AbsoluteExpression)

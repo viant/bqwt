@@ -43,7 +43,6 @@ func TestMeta_Update(t *testing.T) {
 					To:   now,
 				},
 				LastChanged: now,
-
 				Changed: true,
 			},
 		},
@@ -92,12 +91,11 @@ func TestMeta_Update(t *testing.T) {
 	}
 
 	for _, useCase := range useCases {
-		useCase.meta.expressions = make([]string, 0)
+
 		updated := useCase.meta.Update(useCase.tableInfo, now)
 		assert.Equal(t, useCase.expected, updated, useCase.description)
-		if useCase.expected.Changed {
-			assert.Equal(t, 1, len(useCase.meta.expressions), useCase.description)
-		}
+		assert.True(t,  updated.Expression != "", useCase.description)
+
 	}
 
 }

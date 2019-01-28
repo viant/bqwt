@@ -10,4 +10,4 @@ services:
       - ${HOME}/.secret/:/root/.secret/
     network_mode: bridge
     environment:
-      - GOOGLE_APPLICATION_CREDENTIALS=/root/.secret/bq-e2e.json
+      - GOOGLE_APPLICATION_CREDENTIALS=/root/.secret/viant-e2e.json

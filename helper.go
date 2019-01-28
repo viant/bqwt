@@ -40,24 +40,12 @@ WHERE last_modified_time > %v
 `
 
 //GetTablesInfo returns table info for supplied dataset
-func GetTablesInfo(ctx context.Context, projectID, datasetID, datasetLocation string, modifiedFrom time.Time, matchingTables []string) ([]*TableInfo, error) {
+func GetTablesInfo(ctx context.Context, projectID, datasetID, datasetLocation string, modifiedFrom time.Time) ([]*TableInfo, error) {
 	SQL := fmt.Sprintf(tableInfoSQL, datasetID, modifiedFrom.Unix()*1000)
 	var err error
 	var result = make([]*TableInfo, 0)
 	if err = RunBQQuery(ctx, projectID, datasetLocation, SQL, []interface{}{}, true, func(row []bigquery.Value) (b bool, e error) {
 		tableName := AsString(row[1])
-		if len(matchingTables) > 0 {
-			hasMatch := false
-			for _, match := range matchingTables {
-				if strings.Contains(tableName, match) {
-					hasMatch = true
-					break
-				}
-			}
-			if !hasMatch {
-				return true, nil
-			}
-		}
 		info := &TableInfo{
 			ProjectID: projectID,
 			DatasetID: AsString(row[0]),

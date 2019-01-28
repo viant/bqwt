@@ -1,7 +1,7 @@
 datastore: testdb
 config:
   driverName: bigquery
-  credentials: bq-e2e
+  credentials: viant-e2e
   parameters:
     datasetId: testdb
 recreate: true

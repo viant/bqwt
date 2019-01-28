@@ -327,13 +327,10 @@ docker-compose up -d
 
 #### Google cloud function deployment
 
-Disclaimer: Go Cloud function is only available at alpha at the moment, use the following [form](https://docs.google.com/forms/d/e/1FAIpQLSfJ08R2z7FumQyYGGuTyK4x5M-6ch7WmJ_3uWYI5SdZUb5SBw/viewform) to apply for early access.
 
 - gcloud auth login
-- gcloud components install alpha
 - gcloud config set project PROJECT_ID
-- export GOOGLE_APPLICATION_CREDENTIALS=credentialFile
-- gcloud alpha functions deploy WindowedTable --entry-point Handle --runtime go111 --trigger-http
+- gcloud functions deploy WindowedTable --entry-point Handle --runtime go111 --trigger-http
 
 
 ## Known limitation
@@ -356,7 +353,7 @@ Find out more about [streaming lifecycle](https://cloud.google.com/blog/products
 Create a 'test' Big Query project and service account with admin permission.
 Enable ssh on test host and create [localhost secret](https://github.com/viant/endly/tree/master/doc/secrets#ssh-credentials)
  
-Create a test [BQ service account secrets](https://github.com/viant/endly/tree/master/doc/secrets#google-cloud-credentials), save it as ~/.secret/bq-e2e.json
+Create a test [BQ service account secrets](https://github.com/viant/endly/tree/master/doc/secrets#google-cloud-credentials), save it as ~/.secret/viant-e2e.json
 
 Install [e2e test runner](https://github.com/viant/endly/releases)
 
