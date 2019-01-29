@@ -80,6 +80,8 @@ func (s *service) Handle(request *Request) *Response {
 		tablesInfo = info
 	}
 
+	//only reset in update mode (when new snapshot is created)
+	response.Meta.ResetChangeFlag()
 	for _, info := range tablesInfo {
 		response.Meta.Update(info, now)
 	}
@@ -89,6 +91,7 @@ func (s *service) Handle(request *Request) *Response {
 func (s *service) processMeta(ctx context.Context, meta *Meta, request *Request, now time.Time) error {
 	pruneThreshold := time.Duration(request.PruneThresholdInSec) * time.Second
 	meta.Prune(pruneThreshold, now)
+
 	if request.IsRead() {
 		var expressions = make([]string, 0)
 		var absoluteExpressions = make([]string, 0)

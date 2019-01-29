@@ -15,6 +15,12 @@ type Meta struct {
 	isTemp             bool
 }
 
+func (m *Meta) ResetChangeFlag() {
+	for _, table := range m.Tables {
+		table.Changed = false
+	}
+}
+
 func (m *Meta) Match(matchExpressions []string) []*WindowedTable {
 	if len(matchExpressions) == 0 {
 		return m.Tables
@@ -68,7 +74,7 @@ func (m *Meta) Prune(threshold time.Duration, now time.Time) {
 	}
 	var tables = make([]*WindowedTable, 0)
 	for _, candidate := range m.Tables {
-		if now.Sub(candidate.LastChanged) > threshold {
+		if now.Sub(candidate.Window.To) > threshold {
 			continue
 		}
 		tables = append(tables, candidate)
