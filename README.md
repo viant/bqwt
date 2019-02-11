@@ -149,20 +149,19 @@ type Request struct {
 
 i.e: http://endpoint/WindowedTable?mode=r&meta=mybucket/xmeta&dataset=db1&expr=true
 
-## Window table snapshooting
+## Window table snapshot
 
-Mode request attribute controls table time window snapshooting, where r: take snapshot, w: persist snapshot.
+Mode request attribute controls table time window snapshot, where r: take a snapshot, w: persist snapshot.
 
 **Taking snapshot**
      
-  - when meta file does not exists the service reads all matching table info and create temp meta file with range decorator expression
+  - when metafile does not exist the service reads all matching table info and create temp metafile with range decorator expression
   - when temp meta file exists the service returns range decorator expression from that file
-  - when meta file exists the services computes changes between meta file and recently updated table, it stores updated table info and range decorator expression in temp meta file
+  - when meta file exists the services compute changes between metafile and recently updated table, it stores updated table info and range decorator expression in a temp metafile
 
-**Persisting snapsho** 
+**Persisting snapshot** 
 
  - temp meta file is persisted to meta file.
-
 
 **Multi Read One Write scenario**
 
