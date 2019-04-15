@@ -3,8 +3,8 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/prometheus/common/log"
 	"github.com/viant/bqwt"
+	"log"
 	"net/http"
 )
 

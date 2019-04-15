@@ -3,7 +3,7 @@ package bqwt
 import (
 	"bytes"
 	"context"
-	"github.com/gin-gonic/gin/json"
+	"encoding/json"
 	"strings"
 	"time"
 )
