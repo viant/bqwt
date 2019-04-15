@@ -343,7 +343,6 @@ While query engine has ability to read records directly from the streaming buffe
 With this in mind this API uses StreamingBuffer.OldestEntryTime - 1 as table time window upper bound.
 
 Practically it  may take a while (upto ~ 90 minutes) before data is finally extracted from streaming buffer to a table.
-I have seen around half an hour to hours buffer flush delay with 15.3 GB buffer size. 
 Find out more about [streaming lifecycle](https://cloud.google.com/blog/products/gcp/life-of-a-bigquery-streaming-insert)  
 
 
