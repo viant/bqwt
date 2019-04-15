@@ -11,7 +11,7 @@ Please refer to [`CHANGELOG.md`](CHANGELOG.md) if you encounter breaking changes
 
 Ability to process incrementally incoming data in a way that is both duplication free and cost-effective is of paramount importance, 
 especially when data is loaded or streamed to BigQuery in real time.
-When dealing with many tables at once managing processing state can be adds yet additional aspect that needs to be taken care.
+When dealing with many tables at once managing processing state can add yet additional aspect that needs to be taken care.
 This library was developed to simplify multi tables time windowing processing.
 It can be deployed as stand alone service or as cloud function.
 
