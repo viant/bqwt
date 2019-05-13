@@ -149,7 +149,7 @@ type Request struct {
 
 i.e: http://endpoint/WindowedTable?mode=r&meta=mybucket/xmeta&dataset=db1&expr=true
 
-Note that changing table eviction time triggers table modification 
+Note that changing table eviction time triggers table modification, thus prune threshold can not be less then 7 days. 
 
 
 
