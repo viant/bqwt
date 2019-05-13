@@ -38,6 +38,18 @@ func (t *WindowedTable) FormatAbsoluteExpr() string {
 
 //NewWindowedTable creates a new windowed table for supplied table info
 func NewWindowedTable(info *TableInfo, now time.Time) *WindowedTable {
+
+	lowerBound := info.Created
+	upperBound := info.LastModified
+	weekAgo := now.Add(-(7*time.Hour*24 + time.Millisecond))
+	if lowerBound.Before(weekAgo) {
+		lowerBound = weekAgo
+	}
+
+	if upperBound.Before(lowerBound) {
+		upperBound = lowerBound.Add(time.Millisecond)
+	}
+
 	var result = &WindowedTable{
 		ID:          fmt.Sprintf("%v.%v", info.DatasetID, info.TableID),
 		Dataset:     info.DatasetID,
@@ -46,8 +58,8 @@ func NewWindowedTable(info *TableInfo, now time.Time) *WindowedTable {
 		LastChanged: now,
 		Changed:     true,
 		Window: &TimeWindow{
-			From: info.Created,
-			To:   info.LastModified,
+			From: lowerBound,
+			To:   upperBound,
 		},
 	}
 	result.Expression = result.FormatExpr()

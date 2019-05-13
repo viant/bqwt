@@ -25,10 +25,10 @@ func (r Request) IsRead() bool {
 
 //Init initializes request
 func (r *Request) Init() error {
-	if r.PruneThresholdInSec == 0 {
-		r.PruneThresholdInSec = 7 * 60 * 60 //7 days
+	minAllowedPruneThresholdSec := 1 + (7 * 60 * 60) //7 days +  1sec
+	if r.PruneThresholdInSec <= minAllowedPruneThresholdSec {
+		r.PruneThresholdInSec = minAllowedPruneThresholdSec
 	}
-
 	if r.LoopbackWindowInSec == 0 {
 		r.LoopbackWindowInSec = 3 * 60 * 60 //3 days
 	}

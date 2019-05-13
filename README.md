@@ -141,13 +141,17 @@ type Request struct {
  - dataset: DatasetID
  - match: MatchingTables
  - location: Location
- - prune: PruneThresholdInSec
+ - prune: PruneThresholdInSec (min 7 days)
  - loopback: LoopbackWindowInSec
  - expr: Expression
  - absExpr: AbsoluteExpression
  - method: Method
 
 i.e: http://endpoint/WindowedTable?mode=r&meta=mybucket/xmeta&dataset=db1&expr=true
+
+Note that changing table eviction time triggers table modification 
+
+
 
 ## Window table snapshot
 
