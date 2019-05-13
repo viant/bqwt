@@ -14,4 +14,4 @@
 .gitignore
 .idea
 node_modules
-vendor
+go.mod
