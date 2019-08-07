@@ -60,3 +60,15 @@ func TestNewWindowedTable(t *testing.T) {
 	}
 
 }
+
+func TestWindowTableNoChangeExpressions(t *testing.T) {
+	windowedTable := NewWindowedTable(&TableInfo{
+		ProjectID:    "p",
+		DatasetID:    "d",
+		TableID:      "t",
+		Created:      time.Unix(1565121000, 0),
+		LastModified: time.Unix(1565121999, 0),
+	}, time.Unix(1565121999, 0))
+	assert.Equal(t, "[p:d.t@1565121999001-1565121999001]", windowedTable.FormatUnchangedAbsoluteExpr())
+	assert.Equal(t, "[d.t@1565121999001-1565121999001]", windowedTable.FormatUnchangedExpr())
+}

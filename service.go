@@ -21,8 +21,17 @@ func (s *service) getTablesInfo(ctx context.Context, request *Request) ([]*Table
 	if err != nil {
 		return nil, err
 	}
+
 	loopBackTime := time.Now().Add(-time.Second * time.Duration(request.LoopbackWindowInSec))
 	return GetTablesInfo(ctx, projectID, request.DatasetID, request.Location, loopBackTime)
+}
+
+func (s *service) getLastModifiedTableInfo(ctx context.Context, request *Request) ([]*TableInfo, error) {
+	projectID, err := getProjectID(request.DatasetID)
+	if err != nil {
+		return nil, err
+	}
+	return GetLastModifiedTableInfo(ctx, projectID, request.DatasetID, request.Location)
 }
 
 func (s *service) loadMetaFile(ctx context.Context, URL, datasetID string) (*Meta, error) {
@@ -34,6 +43,7 @@ func (s *service) loadMetaFile(ctx context.Context, URL, datasetID string) (*Met
 			if content, err = DownloadGSContent(ctx, URL); err == nil {
 				err = json.NewDecoder(bytes.NewReader(content)).Decode(result)
 			}
+			result.SortLastModifiedDesc()
 			return result, nil
 		}
 		return nil, err
@@ -41,6 +51,7 @@ func (s *service) loadMetaFile(ctx context.Context, URL, datasetID string) (*Met
 	if err = json.NewDecoder(bytes.NewReader(content)).Decode(result); err == nil {
 		result.isTemp = true
 	}
+	result.SortLastModifiedDesc()
 	return result, err
 }
 
@@ -63,11 +74,11 @@ func (s *service) Handle(request *Request) *Response {
 		return response
 	}
 	now := time.Now()
+
 	defer func() {
 		err = s.processMeta(ctx, response.Meta, request, now)
 		response.SetErrorIfNeeded(err)
 	}()
-
 	if len(tablesInfo) == 0 || response.Meta.isTemp {
 		return response
 	}
@@ -85,13 +96,14 @@ func (s *service) Handle(request *Request) *Response {
 	for _, info := range tablesInfo {
 		response.Meta.Update(info, now)
 	}
+
 	return response
 }
 
 func (s *service) processMeta(ctx context.Context, meta *Meta, request *Request, now time.Time) error {
 	pruneThreshold := time.Duration(request.PruneThresholdInSec) * time.Second
 	meta.Prune(pruneThreshold, now)
-
+	meta.SortLastModifiedDesc()
 	if request.IsRead() {
 		var expressions = make([]string, 0)
 		var absoluteExpressions = make([]string, 0)
@@ -99,6 +111,29 @@ func (s *service) processMeta(ctx context.Context, meta *Meta, request *Request,
 			if table.Changed {
 				expressions = append(expressions, table.Expression)
 				absoluteExpressions = append(absoluteExpressions, table.AbsoluteExpression)
+			}
+		}
+		if len(expressions) == 0 || len(absoluteExpressions) == 0 {
+			var defaultExpression string
+			var defaultAbsoluteExpression string
+			defaultIsValid := false
+			if len(meta.Tables) > 0 {
+				defaultExpression = meta.Tables[0].FormatUnchangedExpr()
+				defaultAbsoluteExpression = meta.Tables[0].FormatUnchangedAbsoluteExpr()
+				defaultIsValid = true
+			} else {
+				ctx := context.Background()
+				lastModifiedTableInfo, err := s.getLastModifiedTableInfo(ctx, request)
+				if err == nil && len(lastModifiedTableInfo) > 0 {
+					lastModifiedWindowTable := NewWindowedTable(lastModifiedTableInfo[0], now)
+					defaultExpression = lastModifiedWindowTable.FormatUnchangedExpr()
+					defaultAbsoluteExpression = lastModifiedWindowTable.FormatUnchangedAbsoluteExpr()
+					defaultIsValid = true
+				}
+			}
+			if defaultIsValid {
+				expressions = append(expressions, defaultExpression)
+				absoluteExpressions = append(absoluteExpressions, defaultAbsoluteExpression)
 			}
 		}
 		meta.Expression = strings.Join(expressions, ",")

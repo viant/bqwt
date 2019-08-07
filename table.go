@@ -25,6 +25,11 @@ func (t *WindowedTable) FormatExpr() string {
 	return fmt.Sprintf("[%v@%v-%v]", t.ID, from, to)
 }
 
+func (t *WindowedTable) FormatUnchangedExpr() string {
+	to := t.Window.To.UnixNano()/int64(time.Millisecond) + 1
+	return fmt.Sprintf("[%v@%v-%v]", t.ID, to, to)
+}
+
 //FormatExpr formats form SQL range decorator expression
 func (t *WindowedTable) FormatAbsoluteExpr() string {
 	from := t.Window.From.UnixNano() / int64(time.Millisecond)
@@ -34,6 +39,16 @@ func (t *WindowedTable) FormatAbsoluteExpr() string {
 		project += ":"
 	}
 	return fmt.Sprintf("[%v%v@%v-%v]", project, t.ID, from, to)
+}
+
+//FormatExpr formats form SQL range decorator expression
+func (t *WindowedTable) FormatUnchangedAbsoluteExpr() string {
+	to := t.Window.To.UnixNano()/int64(time.Millisecond) + 1
+	project := t.ProjectID
+	if project != "" {
+		project += ":"
+	}
+	return fmt.Sprintf("[%v%v@%v-%v]", project, t.ID, to, to)
 }
 
 //NewWindowedTable creates a new windowed table for supplied table info

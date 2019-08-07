@@ -1,0 +1,9 @@
+datastore: testdb
+config:
+  driverName: bigquery
+  credentials: viant-e2e
+  parameters:
+    datasetId: testdb
+recreate: true
+scripts:
+  - URL: test/config/schema2.sql

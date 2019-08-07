@@ -120,3 +120,23 @@ func TestMeta_Prune(t *testing.T) {
 	}
 
 }
+
+func TestMeta_SortLastModifiedDesc(t *testing.T) {
+	agesAgo := time.Now().Add(-time.Hour * 120)
+	t0 := time.Now().Add(-3 * time.Hour)
+	t1 := time.Now().Add(-2 * time.Hour)
+	t2 := time.Now().Add(-1 * time.Hour)
+	t3 := time.Now()
+
+	meta := NewMeta("gs://bucket/meta.json", "dataset")
+	meta.Update(NewTableInfo("p", "dataset", "table2", agesAgo, t2), t2)
+	meta.Update(NewTableInfo("p", "dataset", "table0", agesAgo, t0), t0)
+	meta.Update(NewTableInfo("p", "dataset", "table3", agesAgo, t3), t3)
+	meta.Update(NewTableInfo("p", "dataset", "table1", agesAgo, t1), t1)
+
+	assert.Equal(t, meta.Tables[0].Name, "table2")
+
+	meta.SortLastModifiedDesc()
+
+	assert.Equal(t, meta.Tables[0].Name, "table3")
+}
