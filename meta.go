@@ -1,6 +1,7 @@
 package bqwt
 
 import (
+	"sort"
 	"strings"
 	"time"
 )
@@ -35,6 +36,14 @@ func (m *Meta) Match(matchExpressions []string) []*WindowedTable {
 		}
 	}
 	return result
+}
+
+func (m *Meta) SortLastModifiedDesc() {
+	if len(m.Tables) > 0 {
+		sort.Slice(m.Tables, func(i, j int) bool {
+			return m.Tables[i].Window.To.Unix() > m.Tables[j].Window.To.Unix()
+		})
+	}
 }
 
 //Update updates table info

@@ -17,7 +17,8 @@ func loadCredentials(location string) (*cred.Config, error) {
 	if location == "" {
 		location = os.Getenv("GOOGLE_APPLICATION_CREDENTIALS")
 	}
-	secretService := secret.New(os.Getenv("HOME"), false)
+	home := os.Getenv("HOME")
+	secretService := secret.New(home, false)
 	return secretService.CredentialsFromLocation(location)
 }
 
@@ -37,13 +38,31 @@ const tableInfoSQL = `
 SELECT dataset_id AS datasetId, table_id As tableId, creation_time AS created, last_modified_time AS lastModified 
 FROM [%s.__TABLES__] 
 WHERE last_modified_time > %v
+ORDER BY last_modified_time DESC
+`
+
+const lastModifiedTableSQL = `
+SELECT dataset_id AS datasetId, table_id As tableId, creation_time AS created, last_modified_time AS lastModified 
+FROM [%s.__TABLES__] 
+ORDER BY last_modified_time DESC
+LIMIT 1
 `
 
 //GetTablesInfo returns table info for supplied dataset
 func GetTablesInfo(ctx context.Context, projectID, datasetID, datasetLocation string, modifiedFrom time.Time) ([]*TableInfo, error) {
 	SQL := fmt.Sprintf(tableInfoSQL, datasetID, modifiedFrom.Unix()*1000)
+	return GetTablesInfoFromSQL(ctx, projectID, datasetLocation, SQL)
+}
+
+func GetLastModifiedTableInfo(ctx context.Context, projectID, datasetID, datasetLocation string) ([]*TableInfo, error) {
+	SQL := fmt.Sprintf(lastModifiedTableSQL, datasetID)
+	return GetTablesInfoFromSQL(ctx, projectID, datasetLocation, SQL)
+}
+
+func GetTablesInfoFromSQL(ctx context.Context, projectID, datasetLocation, SQL string) ([]*TableInfo, error) {
 	var err error
 	var result = make([]*TableInfo, 0)
+
 	if err = RunBQQuery(ctx, projectID, datasetLocation, SQL, []interface{}{}, true, func(row []bigquery.Value) (b bool, e error) {
 		tableName := AsString(row[1])
 		info := &TableInfo{
@@ -62,6 +81,7 @@ func GetTablesInfo(ctx context.Context, projectID, datasetID, datasetLocation st
 	}); err != nil {
 		return nil, err
 	}
+
 	return result, err
 }
 

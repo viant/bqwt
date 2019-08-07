@@ -139,6 +139,32 @@ pipeline:
             expect:
               Code: 200
 
+      takeSnapshot4:
+        action: http/runner:send
+        comments: take snapshot without streaming - should get 0 rows
+        requests:
+          - URL: http://127.0.0.1:8080/WindowedTable?mode=r&meta=$meta&method=${method}&dataset=db1&match=table${i}&expr=true
+            expect:
+              Code: 200
+              Body: /table${i}/
+        post:
+          checkSQL: SELECT /* USE LEGACY SQL */ COUNT(*) AS cnt FROM  ${Responses[0].Body}
+
+      assertMatchBatch4:
+        action: dsunit:query
+        comments: check row count in time windowed table which should be empty since nothing was streamed
+        datastore: db1
+        SQL: $checkSQL
+        expect:
+          - cnt: 0
+
+      persistSnapshot4:
+        action: http/runner:send
+        comments: persist another snapshot
+        requests:
+          - URL: http://127.0.0.1:8080/WindowedTable?mode=w&meta=$meta&dataset=db1&match=table${i}&expr=true
+            expect:
+              Code: 200
 
 
     post-test-sleep:

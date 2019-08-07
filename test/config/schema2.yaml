@@ -1,0 +1,5 @@
+CREATE OR REPLACE TABLE dummy2 (
+id         INT64,
+name   STRING,
+modified   TIMESTAMP
+);
