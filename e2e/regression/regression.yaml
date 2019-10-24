@@ -55,6 +55,13 @@ pipeline:
         expect:
           - cnt: 2
 
+      assertTempCreated1:
+        action: storage:exists
+        assets:
+          - url: 'file:///tmp/e2e-meta$i-tmp'
+        expect:
+          "file:///tmp/e2e-meta$i-tmp": true
+
       persistSnapshot1:
         action: http/runner:send
         comments: persist processed snapshot by moving temp meta to meta file
@@ -157,6 +164,14 @@ pipeline:
         SQL: $checkSQL
         expect:
           - cnt: 0
+
+      assertTempNotCreated4:
+        action: storage:exists
+        assets:
+          - url: 'file:///tmp/e2e-meta$i-tmp'
+        expect:
+          "file:///tmp/e2e-meta$i-tmp": false
+
 
       persistSnapshot4:
         action: http/runner:send

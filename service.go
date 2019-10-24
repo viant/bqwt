@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"os"
 	"strings"
 	"time"
 )
@@ -18,6 +19,7 @@ type service struct{}
 
 func (s *service) getTablesInfo(ctx context.Context, request *Request) ([]*TableInfo, error) {
 	projectID, err := getProjectID(request.DatasetID)
+
 	if err != nil {
 		return nil, err
 	}
@@ -70,15 +72,18 @@ func (s *service) Handle(request *Request) *Response {
 	if err == nil && !response.Meta.isTemp && request.IsRead() {
 		tablesInfo, err = s.getTablesInfo(ctx, request)
 	}
+
 	if response.SetErrorIfNeeded(err) {
 		return response
 	}
+
 	now := time.Now()
 
 	defer func() {
 		err = s.processMeta(ctx, response.Meta, request, now)
 		response.SetErrorIfNeeded(err)
 	}()
+
 	if len(tablesInfo) == 0 || response.Meta.isTemp {
 		return response
 	}
@@ -104,6 +109,7 @@ func (s *service) processMeta(ctx context.Context, meta *Meta, request *Request,
 	pruneThreshold := time.Duration(request.PruneThresholdInSec) * time.Second
 	meta.Prune(pruneThreshold, now)
 	meta.SortLastModifiedDesc()
+	hasNewData := true
 	if request.IsRead() {
 		var expressions = make([]string, 0)
 		var absoluteExpressions = make([]string, 0)
@@ -116,11 +122,10 @@ func (s *service) processMeta(ctx context.Context, meta *Meta, request *Request,
 		if len(expressions) == 0 || len(absoluteExpressions) == 0 {
 			var defaultExpression string
 			var defaultAbsoluteExpression string
-			defaultIsValid := false
 			if len(meta.Tables) > 0 {
 				defaultExpression = meta.Tables[0].FormatUnchangedExpr()
 				defaultAbsoluteExpression = meta.Tables[0].FormatUnchangedAbsoluteExpr()
-				defaultIsValid = true
+				hasNewData = false
 			} else {
 				ctx := context.Background()
 				lastModifiedTableInfo, err := s.getLastModifiedTableInfo(ctx, request)
@@ -128,10 +133,10 @@ func (s *service) processMeta(ctx context.Context, meta *Meta, request *Request,
 					lastModifiedWindowTable := NewWindowedTable(lastModifiedTableInfo[0], now)
 					defaultExpression = lastModifiedWindowTable.FormatUnchangedExpr()
 					defaultAbsoluteExpression = lastModifiedWindowTable.FormatUnchangedAbsoluteExpr()
-					defaultIsValid = true
+					hasNewData = false
 				}
 			}
-			if defaultIsValid {
+			if !hasNewData {
 				expressions = append(expressions, defaultExpression)
 				absoluteExpressions = append(absoluteExpressions, defaultAbsoluteExpression)
 			}
@@ -142,8 +147,11 @@ func (s *service) processMeta(ctx context.Context, meta *Meta, request *Request,
 	var err error
 	switch request.Mode {
 	case "r":
-		URL := getTempURL(request.MetaURL)
-		return s.uploadMeta(ctx, URL, meta)
+		if hasNewData { //create temp meta only if new data was seen on read
+			URL := getTempURL(request.MetaURL)
+			return s.uploadMeta(ctx, URL, meta)
+		}
+		return nil
 	case "rw", "w":
 		err = s.uploadMeta(ctx, request.MetaURL, meta)
 		if err == nil {

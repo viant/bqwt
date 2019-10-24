@@ -53,7 +53,7 @@ pipeline:
 
 
   stop:
-    action: process:stop-all
+    action: process:stop
     input: ${app}
 
   start:
@@ -64,7 +64,6 @@ pipeline:
     arguments:
       - '-port'
       - 8080
-
     options:
       env:
         GOOGLE_APPLICATION_CREDENTIALS: ${env.HOME}/.secret/${bqCredentials}.json

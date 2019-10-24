@@ -52,11 +52,9 @@ func (r *Request) Validate() error {
 	if r.MetaURL == "" {
 		return fmt.Errorf("SourceMetaURL was empty")
 	}
-
 	if r.DatasetID == "" {
 		return fmt.Errorf("DatasetID was empty")
 	}
-
 	switch r.Mode {
 	case "r", "w", "rw":
 	default:
