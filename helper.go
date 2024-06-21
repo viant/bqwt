@@ -34,36 +34,53 @@ func getProjectID(datasetID string) (string, error) {
 	return credConfig.ProjectID, nil
 }
 
-const tableInfoSQL = `
-SELECT dataset_id AS datasetId, table_id As tableId, creation_time AS created, last_modified_time AS lastModified 
-FROM [%s.__TABLES__] 
-WHERE last_modified_time > %v
-ORDER BY last_modified_time DESC
-`
-
-const lastModifiedTableSQL = `
-SELECT dataset_id AS datasetId, table_id As tableId, creation_time AS created, last_modified_time AS lastModified 
-FROM [%s.__TABLES__] 
-ORDER BY last_modified_time DESC
-LIMIT 1
-`
-
-//GetTablesInfo returns table info for supplied dataset
-func GetTablesInfo(ctx context.Context, projectID, datasetID, datasetLocation string, modifiedFrom time.Time) ([]*TableInfo, error) {
-	SQL := fmt.Sprintf(tableInfoSQL, datasetID, modifiedFrom.Unix()*1000)
-	return GetTablesInfoFromSQL(ctx, projectID, datasetLocation, SQL)
+func getSchemaName(datasetID string) string {
+	datasetFragments := strings.SplitN(datasetID, ":", 2)
+	if len(datasetFragments) == 2 {
+		return datasetFragments[1]
+	}
+	return ""
 }
 
-func GetLastModifiedTableInfo(ctx context.Context, projectID, datasetID, datasetLocation string) ([]*TableInfo, error) {
-	SQL := fmt.Sprintf(lastModifiedTableSQL, datasetID)
-	return GetTablesInfoFromSQL(ctx, projectID, datasetLocation, SQL)
+// GetTablesInfo returns table info for supplied dataset
+func GetTablesInfo(ctx context.Context, request *Request) ([]*TableInfo, error) {
+	projectID, err := getProjectID(request.DatasetID)
+	if err != nil {
+		return nil, err
+	}
+
+	//schema is same as dataset
+	schema := getSchemaName(request.DatasetID)
+	if schema == "" {
+		return nil, fmt.Errorf("dataset schema field is empty")
+	}
+
+	SQL := ""
+	useLegacy := true
+	if request.LoopbackWindowInSec > 0 {
+		loopBackTime := time.Now().Add(-time.Second * time.Duration(request.LoopbackWindowInSec))
+		SQL = fmt.Sprintf(TableInfoLegacySQL, request.DatasetID, loopBackTime.Unix()*1000)
+		if request.StorageRegion != "" {
+			useLegacy = false
+			SQL = fmt.Sprintf(TableInfoStandardSQL, request.StorageRegion, loopBackTime.Unix()*1000, schema)
+		}
+	} else {
+		SQL = fmt.Sprintf(LastModifiedTableLegacySQL, request.DatasetID)
+		if request.StorageRegion != "" {
+			useLegacy = false
+			SQL = fmt.Sprintf(LastModifiedTableStandardSQL, request.StorageRegion, schema)
+		}
+	}
+
+	return GetTablesInfoFromSQL(ctx, projectID, request.Location, SQL, useLegacy)
+
 }
 
-func GetTablesInfoFromSQL(ctx context.Context, projectID, datasetLocation, SQL string) ([]*TableInfo, error) {
+func GetTablesInfoFromSQL(ctx context.Context, projectID, datasetLocation, SQL string, useLegacy bool) ([]*TableInfo, error) {
 	var err error
 	var result = make([]*TableInfo, 0)
 
-	if err = RunBQQuery(ctx, projectID, datasetLocation, SQL, []interface{}{}, true, func(row []bigquery.Value) (b bool, e error) {
+	if err = RunBQQuery(ctx, projectID, datasetLocation, SQL, []interface{}{}, useLegacy, func(row []bigquery.Value) (b bool, e error) {
 		tableName := AsString(row[1])
 		info := &TableInfo{
 			ProjectID: projectID,

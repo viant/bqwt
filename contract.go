@@ -5,7 +5,7 @@ import (
 	"strings"
 )
 
-//Request represents a request for windowed tables
+// Request represents a request for windowed tables
 type Request struct {
 	Mode                string   `description:"operation mode: r - take snapshot, w - persist snapshot"`
 	MetaURL             string   `description:"meta-file location, if relative path is used it adds gs:// protocol"`
@@ -17,13 +17,14 @@ type Request struct {
 	Expression          bool     `description:"if expression flag is set it returns only relative expression (without poejct id)"`
 	AbsoluteExpression  bool     `description:"if expression flag is set it returns only abslute  expression (with poejct id)"`
 	Method              string   `description:"data insert method: stream or load by default"`
+	StorageRegion       string   `description:"storageRegion for standard sql"`
 }
 
 func (r Request) IsRead() bool {
 	return strings.HasPrefix(r.Mode, "r")
 }
 
-//Init initializes request
+// Init initializes request
 func (r *Request) Init() error {
 	minAllowedPruneThresholdSec := 1 + (7 * 60 * 60) //7 days +  1sec
 	if r.PruneThresholdInSec <= minAllowedPruneThresholdSec {
@@ -47,7 +48,7 @@ func (r *Request) Init() error {
 	return nil
 }
 
-//Validate check if request is valid
+// Validate check if request is valid
 func (r *Request) Validate() error {
 	if r.MetaURL == "" {
 		return fmt.Errorf("SourceMetaURL was empty")
@@ -63,7 +64,7 @@ func (r *Request) Validate() error {
 	return nil
 }
 
-//Response represents a windowed table response
+// Response represents a windowed table response
 type Response struct {
 	Status string
 	Error  string

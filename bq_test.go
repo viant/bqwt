@@ -3,6 +3,7 @@ package bqwt
 import (
 	"cloud.google.com/go/bigquery"
 	"context"
+	"fmt"
 	"github.com/stretchr/testify/assert"
 	"testing"
 	"time"
@@ -51,5 +52,35 @@ func TestAsTime(t *testing.T) {
 		assert.Nil(t, err)
 		assert.EqualValues(t, 2018, ts.Year())
 	}
+
+}
+
+func TestStandardSQL(t *testing.T) {
+
+	ctx := context.Background()
+	schema := getSchemaName("viant-e2e:test")
+	SQL := fmt.Sprintf(LastModifiedTableStandardSQL, "viant-e2e.region-us", schema)
+	//fmt.Println(SQL)
+	useLegacy := false
+	record := struct {
+		f1 string
+		f2 string
+		f3 time.Time
+		f4 time.Time
+	}{}
+	var err error
+	err = RunBQQuery(ctx, "viant-e2e", "", SQL, nil, useLegacy, func(row []bigquery.Value) (b bool, e error) {
+		record.f1 = AsString(row[0])
+		record.f2 = AsString(row[1])
+		//fmt.Println(record.f1)
+		//fmt.Println(record.f2)
+		if record.f3, err = AsTime(row[2]); err != nil {
+			return false, err
+		}
+		if record.f4, err = AsTime(row[3]); err != nil {
+			return false, err
+		}
+		return true, nil
+	})
 
 }

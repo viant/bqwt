@@ -11,15 +11,18 @@ import (
 
 func TestGetTableInfo(t *testing.T) {
 	ctx := context.Background()
-	loopBackTime := time.Now().Add(-(time.Hour * 7 * 24))
-	projectID, _ := getProjectID("")
 	if dsunit.InitFromURL(t, "test/config/init.yaml") {
 		if !dsunit.PrepareFor(t, "testdb", "test/data", "get_table_info") {
 			return
 		}
 	}
 
-	info, err := GetTablesInfo(ctx, projectID, "testdb", "", loopBackTime)
+	request := &Request{
+		DatasetID:     "viant-e2e:testdb",
+		StorageRegion: "viant-e2e.us-region",
+	}
+	info, err := GetTablesInfo(ctx, request)
+
 	assert.Nil(t, err)
 	if !assert.True(t, len(info) > 0) {
 		return
@@ -31,7 +34,11 @@ func TestGetTableInfo(t *testing.T) {
 
 func TestGetTableInfoLastModified(t *testing.T) {
 	ctx := context.Background()
-	projectID, _ := getProjectID("")
+	request := &Request{
+		DatasetID:     "viant-e2e:testdb",
+		StorageRegion: "viant-e2e.us-region",
+	}
+
 	if dsunit.InitFromURL(t, "test/config/init.yaml") {
 		if !dsunit.PrepareFor(t, "testdb", "test/data", "get_table_info") {
 			return
@@ -44,7 +51,7 @@ func TestGetTableInfoLastModified(t *testing.T) {
 		}
 	}
 
-	info, err := GetLastModifiedTableInfo(ctx, projectID, "testdb", "")
+	info, err := GetTablesInfo(ctx, request)
 	assert.Nil(t, err)
 	if !assert.True(t, len(info) == 1) {
 		return
