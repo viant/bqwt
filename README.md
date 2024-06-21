@@ -94,7 +94,7 @@ type WindowedTable struct {
 	Name               string
 	Dataset            string
 	Window             *TimeWindow `description:"recent change range: from, to timestamp"`
-	LastChanged    time.Time 
+	LastChanged        time.Time 
 	Changed            bool
 	Expression         string `description:"represents table ranged decorator expression"`
 	AbsoluteExpression string `description:"represents absolute table path ranged decorator expression"`
@@ -130,6 +130,7 @@ type Request struct {
 	Expression          bool     `description:"if expression flag is set it returns only relative expression (without poejct id)"`
 	AbsoluteExpression  bool     `description:"if expression flag is set it returns only abslute  expression (with poejct id)"`
 	Method              string   `description:"data insert method: stream or load by default"`
+    StorageRegion       string   `description:"storageRegion for standard sql"`
 }
 ```
 
@@ -146,6 +147,7 @@ type Request struct {
  - expr: Expression
  - absExpr: AbsoluteExpression
  - method: Method
+ - storage: StorageRegion, with or without project id
 
 i.e: http://endpoint/WindowedTable?mode=r&meta=mybucket/xmeta&dataset=db1&expr=true
 
@@ -198,13 +200,13 @@ The following shows example dataset windowing timeline:
 
 ```go
 
-	snapshoot1, err := getHttpBody("http://myEndpoint/WindowedTable?mode=r&meta=myBucket/meta&dataset=myDataset")
+	snapshot1, err := getHttpBody("http://myEndpoint/WindowedTable?mode=r&meta=myBucket/meta&dataset=myDataset")
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	if hasData :=  len(snapshoot1) > 0;hasData {
-		SQL := "SELECT * FROM " + string(snapshoot1)
+		SQL := "SELECT * FROM " + string(snapshot1)
 		fmt.Printf("%v\n", SQL)
 
 		//Process query ....

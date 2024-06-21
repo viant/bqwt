@@ -8,24 +8,25 @@ import (
 )
 
 type FormFields struct {
-	Meta         string
-	Method       string
-	Dataset      string
-	Mode         string
-	Match        string
-	Location     string
-	Expr         string
-	Loopback     string
-	Prune        string
-	AbsoluteExpr string
+	Meta          string
+	Method        string
+	Dataset       string
+	Mode          string
+	Match         string
+	Location      string
+	Expr          string
+	Loopback      string
+	Prune         string
+	AbsoluteExpr  string
+	StorageRegion string
 }
 
 func (f *FormFields) Validate() error {
 	if f.Meta == "" {
-		return fmt.Errorf("meta wass empty")
+		return fmt.Errorf("meta is empty")
 	}
 	if f.Dataset == "" {
-		return fmt.Errorf("dataset wass empty")
+		return fmt.Errorf("dataset is empty")
 	}
 	return nil
 }
@@ -47,6 +48,7 @@ func (f *FormFields) AsRequest() (*Request, error) {
 	request.Method = f.Method
 	request.Expression = toolbox.AsBoolean(f.Expr)
 	request.AbsoluteExpression = toolbox.AsBoolean(f.AbsoluteExpr)
+	request.StorageRegion = f.StorageRegion
 
 	if f.Loopback != "" {
 		if request.LoopbackWindowInSec, err = toolbox.ToInt(f.Loopback); err != nil {
@@ -69,15 +71,16 @@ func NewFormFields(request *http.Request) (*FormFields, error) {
 		return nil, fmt.Errorf("form field were empty")
 	}
 	return &FormFields{
-		Method:       request.Form.Get("method"),
-		Meta:         request.Form.Get("meta"),
-		Dataset:      request.Form.Get("dataset"),
-		Mode:         request.Form.Get("mode"),
-		Match:        request.Form.Get("match"),
-		Location:     request.Form.Get("location"),
-		Expr:         request.Form.Get("expr"),
-		Loopback:     request.Form.Get("loopback"),
-		Prune:        request.Form.Get("prune"),
-		AbsoluteExpr: request.Form.Get("absExpr"),
+		Method:        request.Form.Get("method"),
+		Meta:          request.Form.Get("meta"),
+		Dataset:       request.Form.Get("dataset"),
+		Mode:          request.Form.Get("mode"),
+		Match:         request.Form.Get("match"),
+		Location:      request.Form.Get("location"),
+		Expr:          request.Form.Get("expr"),
+		Loopback:      request.Form.Get("loopback"),
+		Prune:         request.Form.Get("prune"),
+		AbsoluteExpr:  request.Form.Get("absExpr"),
+		StorageRegion: request.Form.Get("storage"),
 	}, nil
 }

@@ -8,32 +8,13 @@ import (
 	"time"
 )
 
-//Service represents time windowed table service
+// Service represents time windowed table service
 type Service interface {
 	//Handle retrieves windowed table from meta file and merges it with table info details
 	Handle(*Request) *Response
 }
 
 type service struct{}
-
-func (s *service) getTablesInfo(ctx context.Context, request *Request) ([]*TableInfo, error) {
-	projectID, err := getProjectID(request.DatasetID)
-
-	if err != nil {
-		return nil, err
-	}
-
-	loopBackTime := time.Now().Add(-time.Second * time.Duration(request.LoopbackWindowInSec))
-	return GetTablesInfo(ctx, projectID, request.DatasetID, request.Location, loopBackTime)
-}
-
-func (s *service) getLastModifiedTableInfo(ctx context.Context, request *Request) ([]*TableInfo, error) {
-	projectID, err := getProjectID(request.DatasetID)
-	if err != nil {
-		return nil, err
-	}
-	return GetLastModifiedTableInfo(ctx, projectID, request.DatasetID, request.Location)
-}
 
 func (s *service) loadMetaFile(ctx context.Context, URL, datasetID string) (*Meta, error) {
 	var result = NewMeta(URL, datasetID)
@@ -69,7 +50,7 @@ func (s *service) Handle(request *Request) *Response {
 	var tablesInfo []*TableInfo
 	response.Meta, err = s.loadMetaFile(ctx, request.MetaURL, request.DatasetID)
 	if err == nil && !response.Meta.isTemp && request.IsRead() {
-		tablesInfo, err = s.getTablesInfo(ctx, request)
+		tablesInfo, err = GetTablesInfo(ctx, request)
 	}
 
 	if response.SetErrorIfNeeded(err) {
@@ -127,7 +108,7 @@ func (s *service) processMeta(ctx context.Context, meta *Meta, request *Request,
 				hasNewData = false
 			} else {
 				ctx := context.Background()
-				lastModifiedTableInfo, err := s.getLastModifiedTableInfo(ctx, request)
+				lastModifiedTableInfo, err := GetTablesInfo(ctx, request)
 				if err == nil && len(lastModifiedTableInfo) > 0 {
 					lastModifiedWindowTable := NewWindowedTable(lastModifiedTableInfo[0], now)
 					defaultExpression = lastModifiedWindowTable.FormatUnchangedExpr()
@@ -208,7 +189,7 @@ func (s *service) getStreamTablesInfo(ctx context.Context, infos []*TableInfo, t
 	return result, nil
 }
 
-//New creates a new windowed table service
+// New creates a new windowed table service
 func New() Service {
 	return &service{}
 }
