@@ -1,13 +1,13 @@
 package bqwt
 
 const (
-	TableInfoStandardSQL = "SELECT table_schema AS datasetId, table_name As tableId, creation_time AS created, storage_last_modified_time AS lastModified " +
+	TableInfoStandardSQL = "SELECT table_schema AS datasetId, table_name As tableId, UNIX_MILLIS(creation_time) AS created, UNIX_MILLIS(storage_last_modified_time) AS lastModified " +
 		"FROM `%s.INFORMATION_SCHEMA.TABLE_STORAGE` " +
-		"WHERE storage_last_modified_time > TIMESTAMP_MILLIS(%v) " +
+		"WHERE UNIX_MILLIS(storage_last_modified_time) > %v " +
 		"AND table_schema = '%s' " +
 		"ORDER BY storage_last_modified_time DESC"
 
-	LastModifiedTableStandardSQL = "SELECT table_schema AS datasetId, table_name As tableId, creation_time AS created, storage_last_modified_time AS lastModified " +
+	LastModifiedTableStandardSQL = "SELECT table_schema AS datasetId, table_name As tableId, UNIX_MILLIS(creation_time) AS created, UNIX_MILLIS(storage_last_modified_time) AS lastModified " +
 		"FROM `%s.INFORMATION_SCHEMA.TABLE_STORAGE` " +
 		"WHERE table_schema = '%s' " +
 		"ORDER BY storage_last_modified_time DESC LIMIT 1"
