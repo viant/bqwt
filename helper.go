@@ -43,7 +43,7 @@ func getSchemaName(datasetID string) string {
 }
 
 // GetTablesInfo returns table info for supplied dataset
-func GetTablesInfo(ctx context.Context, request *Request) ([]*TableInfo, error) {
+func GetTablesInfo(ctx context.Context, request *Request, lastModified bool) ([]*TableInfo, error) {
 	projectID, err := getProjectID(request.DatasetID)
 	if err != nil {
 		return nil, err
@@ -57,7 +57,7 @@ func GetTablesInfo(ctx context.Context, request *Request) ([]*TableInfo, error) 
 
 	SQL := ""
 	useLegacy := true
-	if request.LoopbackWindowInSec > 0 {
+	if !lastModified {
 		loopBackTime := time.Now().Add(-time.Second * time.Duration(request.LoopbackWindowInSec))
 		SQL = fmt.Sprintf(TableInfoLegacySQL, request.DatasetID, loopBackTime.Unix()*1000)
 		if request.StorageRegion != "" {

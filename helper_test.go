@@ -21,7 +21,7 @@ func TestGetTableInfo(t *testing.T) {
 		DatasetID:     "viant-e2e:testdb",
 		StorageRegion: "viant-e2e.us-region",
 	}
-	info, err := GetTablesInfo(ctx, request)
+	info, err := GetTablesInfo(ctx, request, false)
 
 	assert.Nil(t, err)
 	if !assert.True(t, len(info) > 0) {
@@ -51,7 +51,7 @@ func TestGetTableInfoLastModified(t *testing.T) {
 		}
 	}
 
-	info, err := GetTablesInfo(ctx, request)
+	info, err := GetTablesInfo(ctx, request, false)
 	assert.Nil(t, err)
 	if !assert.True(t, len(info) == 1) {
 		return

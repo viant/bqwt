@@ -50,7 +50,7 @@ func (s *service) Handle(request *Request) *Response {
 	var tablesInfo []*TableInfo
 	response.Meta, err = s.loadMetaFile(ctx, request.MetaURL, request.DatasetID)
 	if err == nil && !response.Meta.isTemp && request.IsRead() {
-		tablesInfo, err = GetTablesInfo(ctx, request)
+		tablesInfo, err = GetTablesInfo(ctx, request, false)
 	}
 
 	if response.SetErrorIfNeeded(err) {
@@ -108,7 +108,7 @@ func (s *service) processMeta(ctx context.Context, meta *Meta, request *Request,
 				hasNewData = false
 			} else {
 				ctx := context.Background()
-				lastModifiedTableInfo, err := GetTablesInfo(ctx, request)
+				lastModifiedTableInfo, err := GetTablesInfo(ctx, request, true)
 				if err == nil && len(lastModifiedTableInfo) > 0 {
 					lastModifiedWindowTable := NewWindowedTable(lastModifiedTableInfo[0], now)
 					defaultExpression = lastModifiedWindowTable.FormatUnchangedExpr()
