@@ -24,11 +24,12 @@ require (
 	github.com/viant/assertly v0.9.0 // indirect
 	github.com/viant/dsc v0.6.4 // indirect
 	go.opencensus.io v0.18.0 // indirect
-	golang.org/x/crypto v0.0.0-20181030102418-4d3f4d9ffa16 // indirect
-	golang.org/x/net v0.0.0-20181106065722-10aee1819953 // indirect
+	golang.org/x/crypto v0.21.0 // indirect
+	golang.org/x/net v0.23.0 // indirect
 	golang.org/x/oauth2 v0.0.0-20181203162652-d668ce993890 // indirect
-	golang.org/x/sys v0.0.0-20181029174526-d69651ed3497 // indirect
-	golang.org/x/text v0.3.1-0.20180807135948-17ff2d5776d2 // indirect
+	golang.org/x/sys v0.18.0 // indirect
+	golang.org/x/term v0.18.0 // indirect
+	golang.org/x/text v0.14.0 // indirect
 	google.golang.org/appengine v1.3.0 // indirect
 	google.golang.org/genproto v0.0.0-20190201180003-4b09977fb922 // indirect
 	google.golang.org/grpc v1.17.0 // indirect
